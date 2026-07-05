@@ -1,0 +1,23 @@
+
+> react-vite-tailwind@0.0.0 build
+> vite build
+
+[36mvite v7.2.4 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 24 modules transformed.
+[31m✗[39m Build failed in 1.55s
+[31merror during build:
+[31m[vite]: Rollup failed to resolve import "xlsx" from "C:/Users/shara/timetable-generator-system-build 88 (2)/timetable-generator-system-build 88/timetable-generator-system-build (1)/src/export.ts".
+This is most likely unintended because it can break your application at runtime.
+If you do want to externalize this module explicitly add it to
+`build.rollupOptions.external`[31m
+    at viteLog (file:///C:/Users/shara/timetable-generator-system-build%2088%20(2)/timetable-generator-system-build%2088/timetable-generator-system-build%20(1)/node_modules/vite/dist/node/chunks/config.js:34283:57)
+    at file:///C:/Users/shara/timetable-generator-system-build%2088%20(2)/timetable-generator-system-build%2088/timetable-generator-system-build%20(1)/node_modules/vite/dist/node/chunks/config.js:34317:73
+    at onwarn (file:///C:/Users/shara/timetable-generator-system-build%2088%20(2)/timetable-generator-system-build%2088/timetable-generator-system-build%20(1)/node_modules/@vitejs/plugin-react/dist/index.js:76:7)
+    at file:///C:/Users/shara/timetable-generator-system-build%2088%20(2)/timetable-generator-system-build%2088/timetable-generator-system-build%20(1)/node_modules/vite/dist/node/chunks/config.js:34317:28
+    at onRollupLog (file:///C:/Users/shara/timetable-generator-system-build%2088%20(2)/timetable-generator-system-build%2088/timetable-generator-system-build%20(1)/node_modules/vite/dist/node/chunks/config.js:34312:63)
+    at onLog (file:///C:/Users/shara/timetable-generator-system-build%2088%20(2)/timetable-generator-system-build%2088/timetable-generator-system-build%20(1)/node_modules/vite/dist/node/chunks/config.js:34115:4)
+    at file:///C:/Users/shara/timetable-generator-system-build%2088%20(2)/timetable-generator-system-build%2088/timetable-generator-system-build%20(1)/node_modules/rollup/dist/es/shared/node-entry.js:20981:32
+    at Object.logger [as onLog] (file:///C:/Users/shara/timetable-generator-system-build%2088%20(2)/timetable-generator-system-build%2088/timetable-generator-system-build%20(1)/node_modules/rollup/dist/es/shared/node-entry.js:22968:9)
+    at ModuleLoader.handleInvalidResolvedId (file:///C:/Users/shara/timetable-generator-system-build%2088%20(2)/timetable-generator-system-build%2088/timetable-generator-system-build%20(1)/node_modules/rollup/dist/es/shared/node-entry.js:21712:26)
+    at file:///C:/Users/shara/timetable-generator-system-build%2088%20(2)/timetable-generator-system-build%2088/timetable-generator-system-build%20(1)/node_modules/rollup/dist/es/shared/node-entry.js:21670:26[39m

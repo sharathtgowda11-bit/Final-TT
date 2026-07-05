@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+*,
+*::before,
+*::after {
+    color-scheme: light !important;
+}
+
+html,
+body {
+    background-color: #ffffff !important;
+    color-scheme: light !important;
+}
+
+@theme {
+    --color-scheme: light;
+}

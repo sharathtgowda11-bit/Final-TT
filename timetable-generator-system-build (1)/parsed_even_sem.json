@@ -1,0 +1,1790 @@
+[
+  {
+    "table": 0,
+    "rows": [
+      [
+        "Sl. No.",
+        "Faculty Name",
+        "SUB1",
+        "SUB2",
+        "",
+        "Sign",
+        "Sign"
+      ],
+      [
+        "",
+        "Dr. Nirmala C.R.",
+        "Skill Development (MTech)",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Dr. Gururaj.T",
+        "Database Management System (BCSPCC403) (4)",
+        "BigData Analytics (MSAD202)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Dr. Jyothi G C",
+        "Machine Learning (BCS602) (4 +1)",
+        "Database Management System Lab (BCSPCC403)",
+        "Biology for Engineers (BBTBIO405) (2)",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Dr. Abdul Razak M S",
+        "Analysis and Design of Algorithms (BCSPCC401) (4+1)",
+        "Advance Java (BCSPCC402) (Theory) (4)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Dr. Santosh. K. C.",
+        "Cloud Computing (BCS601) (4)",
+        "Advanced Java (BCS613D) 6th sem (3)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Dr. Naseer. R",
+        "Introduction to AI and its Applications (BFYETC213) (4)",
+        "Advanced Java (BCS613D) 6th sem (3)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Dr. Naresh Patel. K. M",
+        "Cloud Computing (BCS601) (4)",
+        "Cloud Computing (MSAD215C) MTech (3)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Dr. Naveen. H. M",
+        "Analysis and Design of Algorithms (BCSPCC401) (4+1)",
+        "Advance Java (BCSPCC402) (Theory) (4)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Dr. Gangadharppa S",
+        "Internet of Things and Applications (MSAD203) MTech (3)",
+        "Advance Java lab (BCSPCC402)",
+        "Biology for Engineers (BBTBIO405) (2)",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Dr. Anusha R",
+        "Machine Learning (BCS602) (4+1)",
+        "Database Management System (BCSPCC403) (Theory) (4)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Dr. Usha G R",
+        "Advance Java (BCSPCC402) (4)",
+        "Advance Operating SystemsMTech (Theory) (4)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Raghu B R",
+        "Cloud Computing (BCS601) (4)",
+        "Blockchain Technology (BCS613A) (3)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Radhika Patil",
+        "Green AI (BCSESC404D)(3)",
+        "Machine Learning (BCS602)(4+1)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Jagadeesh A N",
+        "Cloud Computing (BCS601) (4)",
+        "Version Control with GIT - Lab (BCSAEC407A) (1)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Anu. C. S",
+        "Machine Learning (BCS602) (4+1)",
+        "Version Control with GIT - Lab (BCSAEC407A)(1)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Waseem Khan",
+        "Blockchain Technology (BCS613A)(3)",
+        "Generative AI (BAIL657C)(1)",
+        "Biology for Engineers (BBTBIO405) (2)",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Gangamma G Hediyalad",
+        "Introduction to AI and its Applications (BFYETC213)(4)",
+        "Generative AI (BAIL657C) (1)",
+        "Environmental Studies\n(BHSENV408) (1)",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Preethi B",
+        "Introduction to AI and its Applications (BFYETC213)(4)",
+        "Version Control with GIT - Lab (BCSAEC407A)(1)",
+        "Environmental Studies\n(BHSENV408) (1)",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Siddesh A S",
+        "Advance Java (BCSPCC402)(4)",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Chandrashekhar M V",
+        "Introduction to AI and its Applications (BFYETC213)(4)",
+        "Version Control with GIT - Lab (BCSAEC407A) (1)",
+        "Environmental Studies\n(BHSENV408) (1)",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Rahima B",
+        "Database Management System (BCSPCC403)(4)",
+        "Biology for Engineers (BBTBIO405) (2)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Vishwanath V K",
+        "Analysis and Design of Algorithms (BCSPCC401)(4+1)",
+        "Advance Java (BCSPCC402) (Theory)(4)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Madhu N Hiremath",
+        "Database Management System (BCSPCC403)(4)",
+        "Biology for Engineers (BBTBIO405)(2)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Shankar Sarji P",
+        "Analysis and Design of Algorithms (BCSPCC401)(4+1)",
+        "Version Control with GIT - Lab (BCSAEC407A)(1)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Rachana G Sunkad",
+        "Analysis and Design of Algorithms (BCSPCC401)(4+1)",
+        "Introduction to Data Structures (BCS654A)(3)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Arjun H",
+        "Database Management System (BCSPCC403)(4)",
+        "Data Analytics with R - Lab (BCSAEC407B)(1)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Raghavendra N T",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Anusha N",
+        "Advance Java (BCSPCC402)(4)",
+        "Mini Project with Seminar (MSAD206) MTech(3)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Ranjitha H S",
+        "Python Programming (BCSPLC215P)(4)",
+        "Indian Knowledge System\n(BIKS609)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Drusti S",
+        "Python Programming (BCSPLC215P)(4)",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Mohammed Muthahir R",
+        "Database Management System (BCSPCC403)(4)",
+        "Biology for Engineers (BBTBIO405) (2)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Archana T Chawhan",
+        "Green AI (BCSESC404D)(3)",
+        "Generative AI (BAIL657C)(3)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Nomitha Chawla",
+        "Analysis and Design of Algorithms (BCSPCC401) (4+1)",
+        "Devops\n(BCSL657D) (1)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Prof. Vinayak P",
+        "Python Programming (BCSPLC215P) (4)",
+        "Advance Java lab (BCSPCC402)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "34.",
+        "Prof. Anusha A",
+        "Introduction to AI and its Applications (BFYETC213)(4)",
+        "Environmental Studies\n(BHSENV408)(1)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "35.",
+        "Prof. Sanjay",
+        "Python Programming (BCSPLC215P) (4)",
+        "Indian Knowledge System\n(BIKS609)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "36.",
+        "Prof. Vinutha K P",
+        "Python Programming (BCSPLC215P) (4)",
+        "Advance Java lab (BCSPCC402)",
+        "Indian Knowledge System\n(BIKS609)",
+        "",
+        ""
+      ],
+      [
+        "37.",
+        "Prof. Nandini B",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "38.",
+        "Prof. Kushi V S",
+        "Python Programming (BCSPLC215P)) (4)",
+        "Indian Knowledge System\n(BIKS609)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "39.",
+        "Prof. Vani H U",
+        "Python Programming (BCSPLC215P) ) (4)",
+        "Environmental Studies\n(BHSENV408) ) (1)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "40.",
+        "Prof. Hithaishini S G",
+        "Python Programming (BCSPLC215P)) (4)",
+        "Environmental Studies\n(BHSENV408)) (1)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "41",
+        "Prof. Kavya",
+        "Big Data Analytics Laboratory (2)",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  {
+    "table": 1,
+    "rows": [
+      [
+        "Sl. No.",
+        "Subject Code",
+        "Subject Name",
+        "Faculty Name",
+        "Faculty Name",
+        "Faculty Name",
+        "Faculty Name",
+        "Faculty Name",
+        "Faculty Name",
+        "Faculty Name",
+        "Faculty Name"
+      ],
+      [
+        "",
+        "",
+        "",
+        "Sec \u2018A\u2019",
+        "Sec \u2018B\u2019",
+        "Sec \u2018C\u2019",
+        "Sec \u2018D\u2019",
+        "Sec \u2018E\u2019",
+        "Sec \u2018E\u2019",
+        "Sec \u2018E\u2019",
+        "Sec \u2018F\u2019"
+      ],
+      [
+        "1",
+        "BCSPCC401",
+        "Analysis and Design of Algorithms",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "2",
+        "BCSPCC402",
+        "Advance Java",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "3",
+        "BCSPCC403",
+        "Database Management System",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "5",
+        "BXXESC404X",
+        "ESC/ETC/PLC\nBCSESC404A - Discrete Mathematical Structures and Graph Theory",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "5",
+        "BXXESC404X",
+        "BCSESC404B - Linear Algebra",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "5",
+        "BXXESC404X",
+        "BCSESC404C - Introduction to Quantum Computing",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "5",
+        "BXXESC404X",
+        "BCSESC404D - Green AI",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "7",
+        "BBTBIO405",
+        "Biology for Engineers",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "8",
+        "BCSPCL406",
+        "Analysis and Design of Algorithms Lab",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "8",
+        "BXXAEC407X",
+        "Ability / Skill Enhancement Course\nBCSAEC407A - Version Control with GIT - Lab",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "8",
+        "",
+        "BCSAEC407B - Data Analytics with R - Lab",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "8",
+        "",
+        "BCSAEC407C - Low-Code/ No-Code - Lab",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "8",
+        "",
+        "BCSAEC407D - Rust Programming Language - Lab",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  {
+    "table": 2,
+    "rows": [
+      [
+        "Sl. No.",
+        "Subject Code",
+        "Subject Name",
+        "Faculty Name",
+        "Faculty Name",
+        "Faculty Name",
+        "Faculty Name",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        "Sec \u2018A\u2019",
+        "Sec \u2018B\u2019",
+        "Sec \u2018C\u2019",
+        "Sec\u2018D\u2019",
+        "Sec\u2018D\u2019"
+      ],
+      [
+        "1",
+        "BCS601",
+        "Cloud Computing (Open Stack /Google)",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "2",
+        "BCS602",
+        "Machine Learning",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "3",
+        "BXX613x",
+        "Professional Elective Course\nBCS613A Blockchain Technology",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "3",
+        "BXX613x",
+        "BCS613B Computer Vision",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "3",
+        "BXX613x",
+        "BCS613C Compiler Design",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "3",
+        "BXX613x",
+        "BCS613D Advanced Java",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "4",
+        "BXX654x",
+        "Open Elective Course \u2013 Introduction to Data Structures",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "5",
+        "BCS685",
+        "Project Phase I",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "6",
+        "BCSL606",
+        "Machine Learning lab",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "7",
+        "BXX657x",
+        "Ability Enhancement Course / Skill Enhancement Course-VI \nBISL657A Tosca \u2013 Automated Software Testing",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "7",
+        "BXX657x",
+        "BCSL657B React",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "7",
+        "BXX657x",
+        "BAIL657C Generative AI",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "7",
+        "BXX657x",
+        "BCSL657D Devops",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "8",
+        "BNSK658",
+        "National Service Scheme (NSS)",
+        "Prof. Jagadesh A N",
+        "Prof. Jagadesh A N",
+        "Prof. Jagadesh A N",
+        "Prof. Jagadesh A N",
+        "Prof. Jagadesh A N",
+        "Prof. Jagadesh A N",
+        "Prof. Jagadesh A N"
+      ],
+      [
+        "8",
+        "BPEK658",
+        "Physical Education (PE) (Sports and Athletics)",
+        "Dr. Naresh Patel.K.M",
+        "Dr. Naresh Patel.K.M",
+        "Dr. Naresh Patel.K.M",
+        "Dr. Naresh Patel.K.M",
+        "Dr. Naresh Patel.K.M",
+        "Dr. Naresh Patel.K.M",
+        "Dr. Naresh Patel.K.M"
+      ],
+      [
+        "8",
+        "BYOK658 Yoga",
+        "Yoga",
+        "Prof. Madhu.N.Hiremath",
+        "Prof. Madhu.N.Hiremath",
+        "Prof. Madhu.N.Hiremath",
+        "Prof. Madhu.N.Hiremath",
+        "Prof. Madhu.N.Hiremath",
+        "Prof. Madhu.N.Hiremath",
+        "Prof. Madhu.N.Hiremath"
+      ],
+      [
+        "9",
+        "BIKS609",
+        "Indian Knowledge System",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  {
+    "table": 3,
+    "rows": [
+      [
+        "3RD \u2018A\u2019",
+        "3RD \u2018B\u2019",
+        "3RD \u2018C\u2019",
+        "3RD \u2018D\u2019",
+        "3RD \u2018E\u2019",
+        "3RD \u2018F\u2019",
+        "5TH \u2018A\u2019",
+        "5TH \u2018B\u2019",
+        "5TH \u2018C\u2019",
+        "",
+        "5TH \u2018D\u2019",
+        "7TH \u2018A\u2019",
+        "7TH \u2018B\u2019",
+        "7TH \u2018C\u2019"
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  {
+    "table": 4,
+    "rows": [
+      [
+        "Sl.No.",
+        "Faculty Name",
+        "SUB1",
+        "SUB2",
+        "SUB3",
+        "Sign"
+      ],
+      [
+        "1",
+        "Dr. Nirmala C.R.",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "2",
+        "Dr. Gururaj.T",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "3",
+        "Dr. Abdul Razak M S",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "4",
+        "Dr. Santosh.K.C.",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "5",
+        "Dr. Naseer.R",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "6",
+        "Dr. Naresh Patel.K.M",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "7",
+        "Dr. Naveen.H.M",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "8",
+        "Dr. Gangadharppa.S",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "9",
+        "Dr. Anusha R",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "10",
+        "Dr. Jyothi G C",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "11",
+        "Dr. Usha G R",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "12",
+        "Prof. Raghu B R",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "13",
+        "Prof. Radhika Patil",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "14",
+        "Prof. Jagadesh A N",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "15",
+        "Prof. Anu.C.S",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "16",
+        "Prof. Waseem Khan",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "17",
+        "Prof. Gangamma.G.Hediyalad",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "18",
+        "Prof. Preethi.B",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "19",
+        "Prof. Siddesh.A.S",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "20",
+        "Prof. Chandrashekhar.M.V",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "21",
+        "Prof. Rahima.B",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "22",
+        "Prof. Vishwanath.V.K",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "23",
+        "Prof. Madhu.N.Hiremath",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "24",
+        "Prof. Shankar.Sarji.P",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "25",
+        "Prof. Swetha.G",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "26",
+        "Prof. Rachana.G.Sunkad",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "27",
+        "Prof. Arjun.H",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "28",
+        "Prof.Raghavendra N T",
+        "<---------------------T & P------------------------->",
+        "<---------------------T & P------------------------->",
+        "<---------------------T & P------------------------->",
+        "<---------------------T & P------------------------->"
+      ],
+      [
+        "29",
+        "Prof. Anusha.N",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "30",
+        "Prof. Ranjitha.H.S",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "31",
+        "Prof. Mohammed Muthahir R",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "32",
+        "Prof. Drusti Shastri",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "33",
+        "Prof. Archana T Chawhan",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "34",
+        "Prof. Nomitha Chawla",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "35",
+        "Ksheera B (New Faculty)",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "36",
+        "Nandini B (New Faculty)",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "37",
+        "New Faculty",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "38",
+        "New Faculty",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "39",
+        "New Faculty",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "40",
+        "New Faculty",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "41",
+        "New Faculty",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  {
+    "table": 5,
+    "rows": [
+      [
+        "Sl. No.",
+        "Subject Code",
+        "Subject Name"
+      ],
+      [
+        "1",
+        "BCS301",
+        "Mathematics for Computer Science"
+      ],
+      [
+        "2",
+        "BCS302",
+        "Digital Design & Computer Organization"
+      ],
+      [
+        "3",
+        "BCS303",
+        "Operating Systems"
+      ],
+      [
+        "4",
+        "BCS304",
+        "Data Structures and Application"
+      ],
+      [
+        "5",
+        "BCSL305",
+        "Data Structures Lab"
+      ],
+      [
+        "6",
+        "BCS306x",
+        "ESC/ETC/PLC\nBCS306A - OOPS with Java"
+      ],
+      [
+        "7",
+        "BSCK307",
+        "Social Connect and Responsibility"
+      ],
+      [
+        "8",
+        "BCS358x",
+        "Ability Enhancement Course/Skill Enhancement\n\nBCS358B - R Programming\nBCS358C - Project Management with Git\nBCS358D - Data Visualization with Python"
+      ],
+      [
+        "9",
+        "BNSK359",
+        "National Service Scheme (NSS) -NSS coordinator"
+      ],
+      [
+        "9",
+        "BPEK359",
+        "Physical Education (PE) (Sports and Athletics)- Physical Education Director"
+      ],
+      [
+        "9",
+        "BYOK359",
+        "Yoga - Yoga Teacher"
+      ]
+    ]
+  },
+  {
+    "table": 6,
+    "rows": [
+      [
+        "Sl. No.",
+        "Subject Code",
+        "Subject Name"
+      ],
+      [
+        "1",
+        "BCS501",
+        "Software Engineering & Project Management"
+      ],
+      [
+        "2",
+        "BCS502",
+        "Computer Networks"
+      ],
+      [
+        "3",
+        "BCS503",
+        "Theory of Computation"
+      ],
+      [
+        "4",
+        "BCSL504",
+        "Web Technology Lab"
+      ],
+      [
+        "5",
+        "BCS515x",
+        "Professional Elective Course\nBCS515A- Computer Graphics\nBCS515C- Unix System Programming"
+      ],
+      [
+        "6",
+        "BCS586",
+        "Mini Project"
+      ],
+      [
+        "7",
+        "BRMK557",
+        "Research Methodology and IPR"
+      ],
+      [
+        "8",
+        "BESK508",
+        "Environmental Studies"
+      ],
+      [
+        "9",
+        "BNSK559",
+        "National Service Scheme (NSS)"
+      ],
+      [
+        "9",
+        "BPEK559",
+        "Physical Education (PE) (Sports and Athletics)"
+      ],
+      [
+        "9",
+        "BYOK559",
+        "Yoga"
+      ]
+    ]
+  },
+  {
+    "table": 7,
+    "rows": [
+      [
+        "Sl. No.",
+        "Subject Code",
+        "Subject Name"
+      ],
+      [
+        "1",
+        "21CS71",
+        "Big Data Analytics"
+      ],
+      [
+        "2",
+        "21CS72",
+        "Cloud Computing"
+      ],
+      [
+        "3",
+        "21XX73X",
+        "Professional elective Course-II\n21CS733-Cryptography and Network Security\n21CS734- Blockchain Technology\n21CS735- Internet of Things"
+      ],
+      [
+        "4",
+        "21XX74X",
+        "Professional elective Course-III\n21CS742- Multiagent Systems\n21CS743- Deep Learning\n21CS744- Robotic Process Automation Design and Development\n21CS745-NoSQL Database"
+      ],
+      [
+        "5",
+        "21XX75X",
+        "Open elective Course-II offered by the CSE Department to other Department students\n21CS753- Introduction to Big Data\n21CS754- Introduction to Data Science"
+      ],
+      [
+        "6",
+        "21CSP76",
+        "Project work"
+      ]
+    ]
+  },
+  {
+    "table": 8,
+    "rows": [
+      [
+        "Sl. No.",
+        "Subject Code",
+        "Subject Name",
+        "Faculty Name",
+        "Faculty Name",
+        "Faculty Name",
+        "Faculty Name"
+      ],
+      [
+        "",
+        "",
+        "",
+        "Sec \u2018A\u2019",
+        "Sec \u2018B\u2019",
+        "Sec \u2018C\u2019",
+        "Sec \u2018D\u2019"
+      ],
+      [
+        "1",
+        "BCS301",
+        "Mathematics for Computer Science",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "2",
+        "BCS302",
+        "Digital Design & Computer Organization",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "3",
+        "BCS303",
+        "Operating Systems",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "4",
+        "BCS304",
+        "Data Structures and Application",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "5",
+        "BCSL305",
+        "Data Structures Lab",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "6",
+        "BCS306x",
+        "ESC/ETC/PLC\nBCS306A - OOPS with Java",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "7",
+        "BSCK307",
+        "Social Connect and Responsibility",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "8",
+        "BCS358x",
+        "Ability Enhancement Course/Skill Enhancement",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "9",
+        "BNSK359",
+        "National Service Scheme (NSS) -NSS coordinator",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "9",
+        "BPEK359",
+        "Physical Education (PE) (Sports and Athletics)",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "9",
+        "BYOK359",
+        "Yoga - Yoga Teacher",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  {
+    "table": 9,
+    "rows": [
+      [
+        "Sl. No.",
+        "Subject Code",
+        "Subject Name",
+        "Faculty Name",
+        "Faculty Name",
+        "Faculty Name"
+      ],
+      [
+        "",
+        "",
+        "",
+        "Sec \u2018A\u2019",
+        "Sec \u2018B\u2019",
+        "Sec \u2018C\u2019"
+      ],
+      [
+        "1",
+        "BCS501",
+        "Software Engineering & Project Management",
+        "",
+        "",
+        ""
+      ],
+      [
+        "2",
+        "BCS502",
+        "Computer Networks",
+        "",
+        "",
+        ""
+      ],
+      [
+        "3",
+        "BCS503",
+        "Theory of Computation",
+        "",
+        "",
+        ""
+      ],
+      [
+        "4",
+        "BCSL504",
+        "Web Technology Lab",
+        "",
+        "",
+        ""
+      ],
+      [
+        "5",
+        "BCS515x",
+        "Professional Elective Course\nBCS515A- Computer Graphics\nBCS515C- Unix System Programming",
+        "",
+        "",
+        ""
+      ],
+      [
+        "6",
+        "BCS586",
+        "Mini Project",
+        "",
+        "",
+        ""
+      ],
+      [
+        "7",
+        "BRMK557",
+        "Research Methodology and IPR",
+        "",
+        "",
+        ""
+      ],
+      [
+        "8",
+        "BESK508",
+        "Environmental Studies",
+        "",
+        "",
+        ""
+      ],
+      [
+        "9",
+        "BNSK559",
+        "National Service Scheme (NSS)",
+        "Prof. Jagadesh A N",
+        "Prof. Jagadesh A N",
+        "Prof. Jagadesh A N"
+      ],
+      [
+        "9",
+        "BPEK559",
+        "Physical Education (PE) (Sports and Athletics)",
+        "Dr. Naresh Patel.K.M",
+        "Dr. Naresh Patel.K.M",
+        "Dr. Naresh Patel.K.M"
+      ],
+      [
+        "9",
+        "BYOK559",
+        "Yoga",
+        "Prof. Madhu.N.Hiremath",
+        "Prof. Madhu.N.Hiremath",
+        "Prof. Madhu.N.Hiremath"
+      ]
+    ]
+  },
+  {
+    "table": 10,
+    "rows": [
+      [
+        "Sl. No",
+        "Subject Code",
+        "Subject Name",
+        "Faculty Name",
+        "Faculty Name",
+        "Faculty Name"
+      ],
+      [
+        "",
+        "",
+        "",
+        "Sec \u2018A\u2019",
+        "Sec \u2018B\u2019",
+        "Sec \u2018C\u2019"
+      ],
+      [
+        "1",
+        "21CS71",
+        "Big Data Analytics",
+        "",
+        "",
+        ""
+      ],
+      [
+        "2",
+        "21CS72",
+        "Cloud Computing",
+        "",
+        "",
+        ""
+      ],
+      [
+        "3",
+        "21XX73X",
+        "Professional elective Course-II\n21CS733-Cryptography and Network Security\n21CS734- Blockchain Technology\n21CS735- Internet of Things",
+        "",
+        "",
+        ""
+      ],
+      [
+        "4",
+        "21XX74X",
+        "Professional elective Course-III\n21CS742- Multiagent Systems\n21CS743- Deep Learning\n21CS744- Robotic Process Automation Design and Development\n21CS745-NoSQL Database",
+        "",
+        "",
+        ""
+      ],
+      [
+        "5",
+        "21CSP76",
+        "Project work",
+        "Dr. Naresh Patel.K.M+\nProf. Rachana.G.Sunkad",
+        "Dr. Naresh Patel.K.M+\nProf. Rachana.G.Sunkad",
+        "Dr. Naresh Patel.K.M+\nProf. Rachana.G.Sunkad"
+      ]
+    ]
+  },
+  {
+    "table": 11,
+    "rows": [
+      [
+        "Professional  Elective-2 (VII SEMESTER)",
+        "Professional  Elective-2 (VII SEMESTER)",
+        "No. of Students opted"
+      ],
+      [
+        "21CS731",
+        "Object oriented Modelling and Design",
+        ""
+      ],
+      [
+        "21CS732",
+        "Digital Image Processing",
+        ""
+      ],
+      [
+        "21CS733",
+        "Cryptography and Network Security",
+        ""
+      ],
+      [
+        "21CS734",
+        "Blockchain Technology",
+        ""
+      ],
+      [
+        "21CS735",
+        "Internet of Things",
+        ""
+      ]
+    ]
+  },
+  {
+    "table": 12,
+    "rows": [
+      [
+        "Professional  Elective-3 (VII SEMESTER)",
+        "Professional  Elective-3 (VII SEMESTER)",
+        "No. of Students opted"
+      ],
+      [
+        "21CS741",
+        "Software Architecture and Design Patterns",
+        ""
+      ],
+      [
+        "21CS742",
+        "Multiagent Systems",
+        ""
+      ],
+      [
+        "21CS743",
+        "Deep Learning",
+        ""
+      ],
+      [
+        "21CS744",
+        "Robotic Process Automation Design and Development",
+        ""
+      ],
+      [
+        "21CS745",
+        "NoSQL Database",
+        ""
+      ]
+    ]
+  },
+  {
+    "table": 13,
+    "rows": [
+      [
+        "Open elective Course-II offered by the CSE Department to other Department students (VII SEMESTER)",
+        "Open elective Course-II offered by the CSE Department to other Department students (VII SEMESTER)",
+        "No. of Students opted"
+      ],
+      [
+        "21CS751",
+        "Programming in Python",
+        ""
+      ],
+      [
+        "21CS752",
+        "Introduction to AI and ML",
+        ""
+      ],
+      [
+        "21CS753",
+        "Introduction to Big Data",
+        ""
+      ],
+      [
+        "21CS754",
+        "Introduction to Data Science",
+        ""
+      ]
+    ]
+  },
+  {
+    "table": 14,
+    "rows": [
+      [
+        "7TH \u2018A\u2019",
+        ""
+      ],
+      [
+        "7TH \u2018B\u2019",
+        ""
+      ],
+      [
+        "7TH \u2018C\u2019",
+        ""
+      ],
+      [
+        "5TH \u2018A\u2019",
+        ""
+      ],
+      [
+        "5TH \u2018B\u2019",
+        ""
+      ],
+      [
+        "5TH \u2018C\u2019",
+        ""
+      ],
+      [
+        "3RD \u2018A\u2019",
+        ""
+      ],
+      [
+        "3RD \u2018B\u2019",
+        ""
+      ],
+      [
+        "3RD \u2018C\u2019",
+        ""
+      ],
+      [
+        "3RD \u2018D\u2019",
+        ""
+      ]
+    ]
+  }
+]
