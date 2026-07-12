@@ -739,7 +739,7 @@ function generateTimetableInternal(
     const countOpts = (lg: typeof appState.labGroups[0]) => {
       let count = 0;
       for (const d of DAYS) {
-        for (const [p1, p2] of labPairsForDay(d)) {
+        for (const [p1, p2] of labPairsForDay(d).filter(([p]) => lg.semester !== 7 || p === 'P1' || p === 'P3')) {
           if (!grid.isSectionFree(lg.sectionId, d, p1) || !grid.isSectionFree(lg.sectionId, d, p2)) continue;
           if (lg.labs.every(le =>
             grid.isFacultyFree(le.facultyId, d, p1, le.labName) &&
@@ -790,7 +790,9 @@ function generateTimetableInternal(
       for (const d of DAYS) {
         // 🚫 Prevent same-day multiple lab sessions
         if (usedDays.has(d)) continue;
-        const pairs = labPairsForDay(d);
+        const pairs = lg.semester === 7
+          ? labPairsForDay(d).filter(([p1]) => p1 === 'P1' || p1 === 'P3')
+          : labPairsForDay(d);
         for (const [p1, p2] of pairs) {
           // Check section is free for both periods
           if (!grid.isSectionFree(lg.sectionId, d, p1) || !grid.isSectionFree(lg.sectionId, d, p2)) continue;
@@ -946,7 +948,9 @@ function generateTimetableInternal(
         retryDayLoop:
         for (const d of reversedDays) {
           if (retryUsedDays.has(d)) continue;
-          const pairs = labPairsForDay(d);
+          const pairs = lg.semester === 7
+            ? labPairsForDay(d).filter(([p1]) => p1 === 'P1' || p1 === 'P3')
+            : labPairsForDay(d);
           for (const [p1, p2] of pairs) {
             if (!grid.isSectionFree(lg.sectionId, d, p1) || !grid.isSectionFree(lg.sectionId, d, p2)) continue;
 
@@ -1080,8 +1084,11 @@ function generateTimetableInternal(
     for (const d of DAYS) {
       // HARD CONSTRAINT: one theory class per subject per section per day
       if (demand.scheduledDays.has(d)) continue;
+      if (demand.semester === 7 && d === 'Saturday') continue;
 
-      const periods = periodsForDay(d);
+      const periods = demand.semester === 7
+        ? (['P5', 'P6', 'P7'] as Period[])
+        : periodsForDay(d);
       for (const p of periods) {
         // 🚫 STRICT: prevent same subject twice in same day
         const alreadyScheduledSameDay = slots.some(s =>
@@ -1121,7 +1128,10 @@ function generateTimetableInternal(
     if (!bestDay) {
       log_(`  ⚠ Relaxing same-day constraint for "${demand.subjectName}" (${sectionMap.get(demand.sectionId)?.name}) — not enough unique days`);
       for (const d of DAYS) {
-        const periods = periodsForDay(d);
+        if (demand.semester === 7 && d === 'Saturday') continue;
+        const periods = demand.semester === 7
+          ? (['P5', 'P6', 'P7'] as Period[])
+          : periodsForDay(d);
         for (const p of periods) {
           // 🚫 STRICT: prevent same subject twice in same day (relaxed pass)
           const alreadyScheduledSameDay = slots.some(s =>

@@ -30,6 +30,7 @@ import { GenerateSemesterPanel } from './components/GenerateSemesterPanel';
 import { DraftTimetablePanel } from './components/DraftTimetablePanel';
 import { SemesterStatusPanel } from './components/SemesterStatusPanel';
 import { CombinedLockedView } from './components/CombinedLockedView';
+import { FacultyWorkloadTable } from './components/FacultyWorkloadTable';
 
 import { v4 as uuid } from 'uuid';
 import {
@@ -53,7 +54,8 @@ type TabKey =
   | 'dashboard' | 'faculty' | 'sections' | 'rooms'
   | 'subjects' | 'electives' | 'labs' | 'frozen'
   | 'config' | 'generate' | 'timetable' | 'validation'
-  | 'generate-semester' | 'draft' | 'semester-status' | 'combined-view';
+  | 'generate-semester' | 'draft' | 'semester-status' | 'combined-view'
+  | 'workload';
 
 const TABS: { key: TabKey; label: string; icon: React.ReactNode; group?: string }[] = [
   { key: 'dashboard', label: 'Dashboard', icon: <BarChart3 size={16} />, group: 'Overview' },
@@ -72,6 +74,7 @@ const TABS: { key: TabKey; label: string; icon: React.ReactNode; group?: string 
   { key: 'combined-view', label: 'All Semesters', icon: <Star size={16} />, group: 'Semester' },
   { key: 'timetable', label: 'View Timetable', icon: <Calendar size={16} />, group: 'Output' },
   { key: 'validation', label: 'Validation', icon: <Shield size={16} />, group: 'Output' },
+  { key: 'workload', label: 'Faculty Workload', icon: <TrendingUp size={16} />, group: 'Output' },
 ];
 
 // ─── Main App ─────────────────────────────────────────────
@@ -196,6 +199,7 @@ export default function App() {
           {activeTab === 'combined-view' && <CombinedLockedView />}
           {activeTab === 'timetable' && <TimetablePanel state={state} />}
           {activeTab === 'validation' && <ValidationPanel state={state} />}
+          {activeTab === 'workload' && <FacultyWorkloadTable state={state} />}
         </div>
       </main>
     </div>

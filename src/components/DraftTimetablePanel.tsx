@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Edit, Lock, Save, Trash2, RefreshCw, CheckCircle2,
-  XCircle, AlertTriangle, ArrowLeftRight, Info,
+  XCircle, AlertTriangle, Info, Layers, GripVertical,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import type { AppState, TimetableSlot, SemesterTimetable } from '../types';
+import type { Day, Period } from '../types';
 import { TimetableGrid } from './TimetableGrid';
 import { useSemesterTimetable } from '../hooks/useSemesterTimetable';
 import { useDraftTimetable } from '../hooks/useDraftTimetable';
@@ -26,7 +27,7 @@ function Badge({ children, color }: { children: React.ReactNode; color: string }
   );
 }
 
-type EditMode = 'none' | 'edit' | 'swap-select-first' | 'swap-select-second';
+type EditMode = 'none' | 'edit';
 
 export function DraftTimetablePanel({ state }: { state: AppState }) {
   const currentYear = new Date().getFullYear();
@@ -40,11 +41,55 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
 
   const [editMode, setEditMode] = useState<EditMode>('none');
   const [selectedSlot, setSelectedSlot] = useState<TimetableSlot | null>(null);
-  const [swapFirst, setSwapFirst] = useState<TimetableSlot | null>(null);
   const [editingSlot, setEditingSlot] = useState<TimetableSlot | null>(null);
+
+  // ── Section switching ──────────────────────────────────────
+  const [activeSectionId, setActiveSectionId] = useState<string | 'all'>('all');
 
   const hook = useSemesterTimetable(academicYear);
   const draftHook = useDraftTimetable(draft, lockedSlots, state);
+
+  // Derive sorted unique sections from the current draft slots
+  const sections = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const s of draftHook.slots) map.set(s.sectionId, s.sectionName);
+    return [...map.entries()]
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [draftHook.slots]);
+
+  // Auto-select first section when draft first loads
+  useEffect(() => {
+    if (sections.length > 0 && activeSectionId === 'all') {
+      setActiveSectionId(sections[0].id);
+    }
+  }, [sections]);
+
+  // Reset section when semester/year changes
+  useEffect(() => {
+    setActiveSectionId('all');
+  }, [targetSemester, academicYear]);
+
+  // Slots visible in the current grid
+  const visibleSlots = useMemo(
+    () => activeSectionId === 'all'
+      ? draftHook.slots
+      : draftHook.slots.filter(s => s.sectionId === activeSectionId),
+    [draftHook.slots, activeSectionId],
+  );
+
+  // Stats for the info strip (single-section view)
+  const sectionStats = useMemo(() => {
+    if (activeSectionId === 'all') return null;
+    const nonCont = visibleSlots.filter(s => !s.isLabContinuation);
+    return {
+      total: nonCont.length,
+      theory: nonCont.filter(s => s.subjectType === 'core' || s.subjectType === 'elective').length,
+      lab: nonCont.filter(s => s.subjectType === 'lab').length,
+    };
+  }, [visibleSlots, activeSectionId]);
+
+  const isAllView = activeSectionId === 'all';
 
   // Load draft + locked slots
   useEffect(() => {
@@ -59,25 +104,32 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
     }).catch(console.error).finally(() => setLoadingDraft(false));
   }, [targetSemester, academicYear]);
 
+  // Reset edit state when switching sections
+  const handleSectionChange = (id: string | 'all') => {
+    setActiveSectionId(id);
+    setEditMode('none');
+    setSelectedSlot(null);
+    setEditingSlot(null);
+  };
+
+  // ── Slot click → open edit modal ────────────────────────────
   const handleSlotClick = (slot: TimetableSlot) => {
     if (slot.isLabContinuation) return;
-
-    if (editMode === 'swap-select-first') {
-      setSwapFirst(slot);
-      setEditMode('swap-select-second');
-      return;
-    }
-
-    if (editMode === 'swap-select-second' && swapFirst) {
-      draftHook.swapSlots(swapFirst.id, slot.id);
-      setSwapFirst(null);
-      setEditMode('none');
-      return;
-    }
-
     setSelectedSlot(slot);
     setEditingSlot({ ...slot });
     setEditMode('edit');
+  };
+
+  // ── Drag-and-drop → swap or move ────────────────────────────
+  const handleSlotDrop = (draggedSlotId: string, targetDay: Day, targetPeriod: Period) => {
+    const targetSlot = visibleSlots.find(
+      s => s.day === targetDay && s.period === targetPeriod && !s.isLabContinuation,
+    );
+    if (targetSlot && targetSlot.id !== draggedSlotId) {
+      draftHook.swapSlots(draggedSlotId, targetSlot.id);
+    } else if (!targetSlot) {
+      draftHook.editSlot(draggedSlotId, { day: targetDay, period: targetPeriod });
+    }
   };
 
   const handleSaveEdit = () => {
@@ -117,8 +169,6 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
     setDraft(updated);
   };
 
-  const viewType = 'section';
-
   if (loadingDraft) {
     return (
       <div className="flex items-center justify-center py-24">
@@ -130,6 +180,7 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
 
   return (
     <div>
+      {/* Page header */}
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm">
@@ -137,7 +188,7 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
           </div>
           <div>
             <h2 className="text-lg font-bold text-slate-800">Draft Timetable</h2>
-            <p className="text-xs text-slate-500">Edit, validate, and lock the semester draft</p>
+            <p className="text-xs text-slate-500">Edit section by section, validate, and lock</p>
           </div>
         </div>
       </div>
@@ -190,7 +241,7 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
                 {draft.lastEditedAt && (
                   <span className="text-xs text-slate-400">Edited {new Date(draft.lastEditedAt).toLocaleDateString()}</span>
                 )}
-                <span className="text-xs text-slate-400">{draftHook.slots.length} slots</span>
+                <span className="text-xs text-slate-400">{draftHook.slots.length} total slots · {sections.length} sections</span>
               </div>
               <div className="flex gap-2">
                 {draftHook.isDirty && (
@@ -222,10 +273,7 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
 
           {/* Validation status */}
           {(draftHook.validation || draftHook.crossSemesterClashes.length > 0) && (
-            <Card className={cn(
-              'mb-4',
-              draftHook.hasErrors ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200',
-            )}>
+            <Card className={cn('mb-4', draftHook.hasErrors ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200')}>
               <div className="flex items-center gap-2 mb-2">
                 {draftHook.hasErrors
                   ? <XCircle size={16} className="text-red-500" />
@@ -268,37 +316,69 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
             </Card>
           )}
 
-          {/* Edit mode toolbar */}
+          {/* ── Section tab bar ───────────────────────────────── */}
+          {sections.length > 0 && (
+            <div className="mb-4 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+              <div className="px-4 pt-3 pb-0 flex items-center gap-2 border-b border-slate-100">
+                <Layers size={13} className="text-slate-400 mb-3" />
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Section</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-4 py-3 flex-wrap">
+                <button
+                  onClick={() => handleSectionChange('all')}
+                  className={cn(
+                    'px-3.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all',
+                    isAllView
+                      ? 'bg-slate-700 text-white border-slate-600 shadow-sm'
+                      : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100 hover:border-slate-300',
+                  )}
+                >
+                  All ({sections.length})
+                </button>
+                {sections.map(sec => (
+                  <button
+                    key={sec.id}
+                    onClick={() => handleSectionChange(sec.id)}
+                    className={cn(
+                      'px-3.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all',
+                      activeSectionId === sec.id
+                        ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700',
+                    )}
+                  >
+                    {sec.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Info strip + interaction hints ────────────────── */}
           <Card className="mb-4">
+            {sectionStats && (
+              <div className="flex items-center gap-4 mb-3 pb-3 border-b border-slate-100 text-[11px] text-slate-500 font-medium">
+                <span className="font-bold text-slate-700">
+                  {sections.find(s => s.id === activeSectionId)?.name}
+                </span>
+                <span><strong className="text-slate-700">{sectionStats.total}</strong> slots</span>
+                <span><strong className="text-indigo-600">{sectionStats.theory}</strong> theory</span>
+                <span><strong className="text-pink-600">{sectionStats.lab}</strong> lab sessions</span>
+              </div>
+            )}
             <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Edit Mode:</span>
-              <button
-                onClick={() => { setEditMode('none'); setSwapFirst(null); }}
-                className={cn(
-                  'px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all',
-                  editMode === 'none' ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300',
-                )}
-              >
-                View
-              </button>
-              <button
-                onClick={() => { setEditMode('swap-select-first'); setSwapFirst(null); }}
-                className={cn(
-                  'px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all flex items-center gap-1.5',
-                  editMode.startsWith('swap') ? 'bg-cyan-600 text-white border-cyan-500' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300',
-                )}
-              >
-                <ArrowLeftRight size={12} /> Swap Slots
-              </button>
-              {editMode === 'swap-select-first' && (
-                <span className="text-[11px] text-cyan-600 font-medium bg-cyan-50 px-2 py-1 rounded border border-cyan-200">
-                  Click first slot to swap
+              {isAllView ? (
+                <span className="text-[11px] text-amber-600 font-medium bg-amber-50 px-2 py-1 rounded border border-amber-200 flex items-center gap-1">
+                  <Info size={11} /> Select a section tab to edit
                 </span>
-              )}
-              {editMode === 'swap-select-second' && swapFirst && (
-                <span className="text-[11px] text-cyan-600 font-medium bg-cyan-50 px-2 py-1 rounded border border-cyan-200">
-                  "{swapFirst.subjectName}" selected — click second slot
-                </span>
+              ) : (
+                <>
+                  <span className="text-[11px] text-indigo-600 font-medium bg-indigo-50 px-2.5 py-1 rounded border border-indigo-200 flex items-center gap-1.5">
+                    <Edit size={11} /> Click a slot to edit faculty / room
+                  </span>
+                  <span className="text-[11px] text-violet-600 font-medium bg-violet-50 px-2.5 py-1 rounded border border-violet-200 flex items-center gap-1.5">
+                    <GripVertical size={11} /> Drag a slot to swap or move it
+                  </span>
+                </>
               )}
             </div>
           </Card>
@@ -308,7 +388,7 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
             <Card className="mb-4 border-indigo-200 bg-indigo-50">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-xs font-bold text-indigo-800 uppercase tracking-wide">
-                  Edit: {selectedSlot?.subjectName} — {selectedSlot?.sectionName}
+                  Edit: {selectedSlot?.subjectName} — {selectedSlot?.sectionName} · {selectedSlot?.day} {selectedSlot?.period}
                 </h3>
                 <button onClick={() => { setEditMode('none'); setSelectedSlot(null); }} className="text-slate-400 hover:text-slate-600">
                   <XCircle size={16} />
@@ -358,18 +438,24 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
           {/* Grid */}
           <Card className="overflow-hidden p-0 shadow-md border-slate-200">
             <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-              <h3 className="text-sm font-black text-slate-800">Semester {targetSemester} Draft Timetable</h3>
-              {editMode !== 'none' && (
-                <Badge color="bg-cyan-50 border border-cyan-200 text-cyan-700">
-                  {editMode === 'swap-select-first' ? 'Select first slot' : editMode === 'swap-select-second' ? 'Select second slot' : 'Click slot to edit'}
+              <h3 className="text-sm font-black text-slate-800">
+                {isAllView
+                  ? `Semester ${targetSemester} — All Sections`
+                  : `Section ${sections.find(s => s.id === activeSectionId)?.name} — Semester ${targetSemester}`
+                }
+              </h3>
+              {isAllView && (
+                <Badge color="bg-slate-100 text-slate-500 border border-slate-200">
+                  Read-only overview
                 </Badge>
               )}
             </div>
             <div className="p-4 bg-white overflow-hidden">
               <TimetableGrid
-                slots={draftHook.slots}
-                viewType={viewType}
-                onSlotClick={editMode !== 'none' ? handleSlotClick : undefined}
+                slots={visibleSlots}
+                viewType="section"
+                onSlotClick={!isAllView ? handleSlotClick : undefined}
+                onSlotDrop={!isAllView ? handleSlotDrop : undefined}
               />
             </div>
           </Card>

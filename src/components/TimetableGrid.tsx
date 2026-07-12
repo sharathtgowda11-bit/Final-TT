@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { DAYS, WEEKDAY_PERIODS, SATURDAY_PERIODS, PERIOD_TIMES } from '../types';
 import type { Day, Period, TimetableSlot } from '../types';
 import { cn } from '../utils/cn';
@@ -15,11 +16,16 @@ export function TimetableGrid({
   slots,
   viewType,
   onSlotClick,
+  onSlotDrop,
 }: {
   slots: TimetableSlot[];
   viewType: TimetableView;
   onSlotClick?: (slot: TimetableSlot) => void;
+  onSlotDrop?: (draggedSlotId: string, targetDay: Day, targetPeriod: Period) => void;
 }) {
+  const [draggingSlotId, setDraggingSlotId] = useState<string | null>(null);
+  const [dragOverCell, setDragOverCell] = useState<{ day: Day; period: Period } | null>(null);
+
   const getSlots = (day: Day, period: Period): TimetableSlot[] =>
     slots.filter(s => s.day === day && s.period === period);
 
@@ -59,31 +65,78 @@ export function TimetableGrid({
                   }
 
                   const cellSlots = getSlots(day, period);
+                  const isDragTarget = dragOverCell?.day === day && dragOverCell?.period === period;
+
                   return (
-                    <td key={period} className="border-2 border-slate-800 p-1.5 align-top min-h-[70px]">
+                    <td
+                      key={period}
+                      className={cn(
+                        'border-2 border-slate-800 p-1.5 align-top min-h-[70px] transition-colors',
+                        isDragTarget && onSlotDrop
+                          ? 'bg-indigo-100 ring-2 ring-inset ring-indigo-400'
+                          : '',
+                      )}
+                      onDragOver={onSlotDrop ? (e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                        setDragOverCell({ day, period });
+                      } : undefined}
+                      onDragLeave={onSlotDrop ? () => setDragOverCell(null) : undefined}
+                      onDrop={onSlotDrop ? (e) => {
+                        e.preventDefault();
+                        setDragOverCell(null);
+                        setDraggingSlotId(null);
+                        const id = e.dataTransfer.getData('slotId');
+                        if (id) onSlotDrop(id, day, period);
+                      } : undefined}
+                    >
                       {cellSlots.length === 0 ? (
-                        <div className="min-h-[50px] flex items-center justify-center text-slate-200 select-none font-bold">—</div>
+                        <div className="min-h-[50px] flex items-center justify-center text-slate-200 select-none font-bold">
+                          {isDragTarget && onSlotDrop
+                            ? <span className="text-indigo-300 text-[11px] font-bold">Drop here</span>
+                            : '—'
+                          }
+                        </div>
                       ) : (
                         <div className="space-y-1">
-                          {cellSlots.map(s => (
-                            <div
-                              key={s.id}
-                              onClick={() => onSlotClick?.(s)}
-                              className={cn(
-                                'rounded-md border p-1.5 leading-tight transition-shadow',
-                                s.isLabContinuation ? SLOT_COLORS['lab-cont'] : SLOT_COLORS[s.subjectType] || SLOT_COLORS.core,
-                                onSlotClick && !s.isLabContinuation && 'cursor-pointer hover:shadow-md hover:ring-1 hover:ring-indigo-400/50',
-                              )}
-                              title={`${s.subjectName} | ${s.facultyName} | ${s.sectionName}${s.batchName ? ` [${s.batchName}]` : ''}`}
-                            >
-                              <div className="font-bold truncate text-[10px] leading-snug tracking-tight">{s.subjectName}</div>
-                              {viewType !== 'faculty' && <div className="font-medium opacity-80 truncate text-[9px] mt-0.5">{s.facultyName}</div>}
-                              {viewType !== 'section' && <div className="font-medium opacity-80 truncate text-[9px] mt-0.5">{s.sectionName}</div>}
-                              {s.batchName && <div className="font-bold opacity-70 text-[8px] bg-white/40 inline-block px-1 rounded mt-0.5">[{s.batchName}]</div>}
-                              {s.roomName && viewType !== 'room' && <div className="font-medium opacity-80 text-[8px] mt-0.5 flex items-center gap-0.5"><span className="opacity-50 text-[10px]">📍</span>{s.roomName}</div>}
-                              {s.isLabContinuation && <div className="font-bold opacity-60 text-[8px] italic mt-0.5 uppercase tracking-wide">↳ cont.</div>}
-                            </div>
-                          ))}
+                          {cellSlots.map(s => {
+                            const isDraggable = !s.isLabContinuation && !!onSlotDrop;
+                            const isBeingDragged = draggingSlotId === s.id;
+                            return (
+                              <div
+                                key={s.id}
+                                draggable={isDraggable}
+                                onClick={() => onSlotClick?.(s)}
+                                onDragStart={isDraggable ? (e) => {
+                                  e.dataTransfer.setData('slotId', s.id);
+                                  e.dataTransfer.effectAllowed = 'move';
+                                  setDraggingSlotId(s.id);
+                                } : undefined}
+                                onDragEnd={isDraggable ? () => {
+                                  setDraggingSlotId(null);
+                                  setDragOverCell(null);
+                                } : undefined}
+                                className={cn(
+                                  'rounded-md border p-1.5 leading-tight transition-all',
+                                  s.isLabContinuation ? SLOT_COLORS['lab-cont'] : SLOT_COLORS[s.subjectType] || SLOT_COLORS.core,
+                                  onSlotClick && !s.isLabContinuation && 'cursor-pointer hover:shadow-md hover:ring-1 hover:ring-indigo-400/50',
+                                  isDraggable && 'cursor-grab active:cursor-grabbing',
+                                  isBeingDragged && 'opacity-40 scale-95',
+                                )}
+                                title={`${s.subjectName} | ${s.facultyName} | ${s.sectionName}${s.batchName ? ` [${s.batchName}]` : ''}`}
+                              >
+                                <div className="font-bold truncate text-[10px] leading-snug tracking-tight">{s.subjectName}</div>
+                                {viewType !== 'faculty' && <div className="font-medium opacity-80 truncate text-[9px] mt-0.5">{s.facultyName}</div>}
+                                {viewType !== 'section' && <div className="font-medium opacity-80 truncate text-[9px] mt-0.5">{s.sectionName}</div>}
+                                {s.batchName && <div className="font-bold opacity-70 text-[8px] bg-white/40 inline-block px-1 rounded mt-0.5">[{s.batchName}]</div>}
+                                {s.roomName && viewType !== 'room' && <div className="font-medium opacity-80 text-[8px] mt-0.5 flex items-center gap-0.5"><span className="opacity-50 text-[10px]">📍</span>{s.roomName}</div>}
+                                {s.isLabContinuation && <div className="font-bold opacity-60 text-[8px] italic mt-0.5 uppercase tracking-wide">↳ cont.</div>}
+                                {isDraggable && (
+                                  <div className="font-bold opacity-40 text-[8px] mt-0.5 tracking-wide">⠿ drag</div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </td>
