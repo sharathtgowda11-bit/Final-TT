@@ -79,6 +79,20 @@ export function GenerateSemesterPanel({
 
   const handleGenerate = useCallback(async () => {
     if (!allReady) return;
+
+    const existingLocked = hook.timetables.find(
+      t => t.semester === targetSemester && t.status === 'LOCKED'
+    );
+    if (existingLocked) {
+      const confirmed = window.confirm(
+        `Semester ${targetSemester} already has a LOCKED timetable for ${academicYear}.\n\n` +
+        `Your locked timetable is safe — generating will only create a new draft alongside it.\n\n` +
+        `If you lock the new draft, the current locked timetable will become INACTIVE (your edits will be lost).\n\n` +
+        `Continue and generate a new draft?`
+      );
+      if (!confirmed) return;
+    }
+
     setGenerating(true);
     setLog([]);
     setCurrentPhase(0);
@@ -254,10 +268,27 @@ export function GenerateSemesterPanel({
       {/* Generate button */}
       <Card className="mb-5 bg-indigo-50 border-indigo-100 flex flex-col items-center text-center">
         <h3 className="text-lg font-black text-indigo-900 mb-2">Generate Semester {targetSemester}</h3>
-        <p className="text-xs text-indigo-600/80 font-medium mb-5">
+        <p className="text-xs text-indigo-600/80 font-medium mb-3">
           Locked semesters are pre-seeded to prevent cross-semester clashes.
           Result is saved as DRAFT for editing before locking.
         </p>
+
+        {/* Current status of selected semester */}
+        {(() => {
+          const st = semStatuses.find(s => s.semester === targetSemester)?.status ?? 'not-generated';
+          if (st === 'LOCKED') return (
+            <div className="mb-4 inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold px-3 py-1.5 rounded-lg">
+              <Lock size={12} /> Semester {targetSemester} is LOCKED — your edits are saved. Generating will create a new draft.
+            </div>
+          );
+          if (st === 'DRAFT') return (
+            <div className="mb-4 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-bold px-3 py-1.5 rounded-lg">
+              <RefreshCw size={12} /> A draft already exists for Semester {targetSemester}. Generating will replace it.
+            </div>
+          );
+          return null;
+        })()}
+
         <div className="flex flex-wrap gap-4 items-center justify-center">
           <button
             onClick={handleGenerate}

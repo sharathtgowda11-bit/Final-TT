@@ -31,6 +31,7 @@ import { DraftTimetablePanel } from './components/DraftTimetablePanel';
 import { SemesterStatusPanel } from './components/SemesterStatusPanel';
 import { CombinedLockedView } from './components/CombinedLockedView';
 import { FacultyWorkloadTable } from './components/FacultyWorkloadTable';
+import { fetchLockedTimetables } from './services/semesterTimetableService';
 
 import { v4 as uuid } from 'uuid';
 import {
@@ -1939,6 +1940,9 @@ function GeneratePanel({ state, setActiveTab }: { state: AppState; setActiveTab:
   const [generating, setGenerating] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
 
+  const currentYear = new Date().getFullYear();
+  const [academicYear, setAcademicYear] = useState(`${currentYear}-${String(currentYear + 1).slice(2)}`);
+
   const job = state.currentJob;
 
   useEffect(() => {
@@ -1971,18 +1975,35 @@ function GeneratePanel({ state, setActiveTab }: { state: AppState; setActiveTab:
     });
 
     cumulativeDelay += 300;
-    setTimeout(() => {
+    setTimeout(async () => {
       try {
         const { timetable, validation, log } = generateTimetable(
           state,
           state.schedulerConfig,
         );
-        setTimetable(timetable, validation);
 
         // Append engine log
         for (const line of log) appendJobLog(line);
 
-        appendJobLog(`✅ Generation complete — ${timetable.length} slots`);
+        // Merge in locked semester timetables so draft edits are reflected
+        let finalSlots = timetable;
+        try {
+          const locked = await fetchLockedTimetables(academicYear);
+          if (locked.length > 0) {
+            const lockedSemesters = new Set(locked.map(t => t.semester));
+            finalSlots = [
+              ...timetable.filter(s => !lockedSemesters.has(s.semester)),
+              ...locked.flatMap(t => t.slots),
+            ];
+            appendJobLog(`🔒 Merged locked edits for semesters: ${[...lockedSemesters].sort((a, b) => a - b).join(', ')}`);
+          }
+        } catch {
+          appendJobLog('⚠️ Could not fetch locked timetables — showing scheduler output only');
+        }
+
+        setTimetable(finalSlots, validation);
+
+        appendJobLog(`✅ Generation complete — ${finalSlots.length} slots`);
         appendJobLog(validation.valid
           ? '🎉 VALID: All hard constraints satisfied!'
           : `⚠️ ${validation.errors.length} hard constraint violations detected`,
@@ -1996,7 +2017,7 @@ function GeneratePanel({ state, setActiveTab }: { state: AppState; setActiveTab:
       }
       setGenerating(false);
     }, cumulativeDelay);
-  }, [state]);
+  }, [state, academicYear]);
 
   const checks = [
     { label: 'Faculty', ok: state.faculty.length > 0, val: state.faculty.length, need: '≥1' },
@@ -2075,7 +2096,18 @@ function GeneratePanel({ state, setActiveTab }: { state: AppState; setActiveTab:
       {/* Generate Button */}
       <Card className="mb-5 bg-indigo-50 border-indigo-100 p-6 flex flex-col items-center justify-center text-center">
         <h3 className="text-lg font-black text-indigo-900 mb-2">Ready to Schedule?</h3>
-        <p className="text-xs text-indigo-600/80 font-medium mb-6">Ensure all data is correct before generation. This action overwrites any existing timetable mapping.</p>
+        <p className="text-xs text-indigo-600/80 font-medium mb-4">Ensure all data is correct before generation. Locked semester timetables for the academic year below will be merged in automatically.</p>
+        <div className="flex items-center gap-2 mb-5">
+          <label className="text-[11px] font-bold text-indigo-700 uppercase tracking-wide whitespace-nowrap">Academic Year</label>
+          <input
+            type="text"
+            value={academicYear}
+            onChange={e => setAcademicYear(e.target.value)}
+            placeholder="2026-27"
+            className="bg-white border border-indigo-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 w-24 text-center shadow-sm"
+          />
+          <span className="text-[11px] text-indigo-500 font-medium">(locked edits for this year are merged)</span>
+        </div>
         <div className="flex flex-wrap items-center justify-center gap-4">
           <Btn
             size="lg"
