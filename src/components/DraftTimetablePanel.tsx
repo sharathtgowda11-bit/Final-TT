@@ -49,14 +49,15 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
   const hook = useSemesterTimetable(academicYear);
   const draftHook = useDraftTimetable(draft, lockedSlots, state);
 
-  // Derive sorted unique sections from the current draft slots
+  // Derive sorted sections from the real section list for this semester
+  // (not from slot data — elective slots carry a placeholder sectionId/sectionName
+  // that would otherwise flicker-overwrite a real section's tab label)
   const sections = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const s of draftHook.slots) map.set(s.sectionId, s.sectionName);
-    return [...map.entries()]
-      .map(([id, name]) => ({ id, name }))
+    return state.sections
+      .filter(s => s.semester === targetSemester)
+      .map(s => ({ id: s.id, name: s.name }))
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [draftHook.slots]);
+  }, [state.sections, targetSemester]);
 
   // Auto-select first section when draft first loads
   useEffect(() => {
@@ -70,13 +71,18 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
     setActiveSectionId('all');
   }, [targetSemester, academicYear]);
 
-  // Slots visible in the current grid
-  const visibleSlots = useMemo(
-    () => activeSectionId === 'all'
-      ? draftHook.slots
-      : draftHook.slots.filter(s => s.sectionId === activeSectionId),
-    [draftHook.slots, activeSectionId],
-  );
+  // Slots visible in the current grid.
+  // Elective slots (electiveGroupId set) belong to every section of their
+  // semester — all batches run concurrently — so a section's tab must show
+  // them even though the scheduler stamps them with one placeholder sectionId.
+  const visibleSlots = useMemo(() => {
+    if (activeSectionId === 'all') return draftHook.slots;
+    const activeSection = state.sections.find(s => s.id === activeSectionId);
+    return draftHook.slots.filter(s =>
+      s.sectionId === activeSectionId ||
+      (!!s.electiveGroupId && !!activeSection && s.semester === activeSection.semester)
+    );
+  }, [draftHook.slots, activeSectionId, state.sections]);
 
   // Stats for the info strip (single-section view)
   const sectionStats = useMemo(() => {
