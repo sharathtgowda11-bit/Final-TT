@@ -4,6 +4,7 @@ import {
   XCircle, AlertTriangle, Info, Layers, GripVertical,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { computeActualFacultyLoad } from '../utils/workload';
 import type { AppState, TimetableSlot, SemesterTimetable } from '../types';
 import type { Day, Period } from '../types';
 import { TimetableGrid } from './TimetableGrid';
@@ -97,6 +98,20 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
 
   const isAllView = activeSectionId === 'all';
 
+  // Eligible co-faculty for the slot currently being edited: pool for this
+  // subject, minus PhD holders, minus the slot's own main faculty, sorted by
+  // ascending actual workload in the current draft.
+  const coFacultyOptions = useMemo(() => {
+    if (!editingSlot || editingSlot.subjectType !== 'lab') return [];
+    const pool = state.coFacultyPools.find(p => p.subjectName === editingSlot.subjectName);
+    if (!pool) return [];
+    const load = computeActualFacultyLoad(draftHook.slots);
+    return pool.facultyIds
+      .map(id => state.faculty.find(f => f.id === id))
+      .filter((f): f is NonNullable<typeof f> => !!f && !f.hasDoctorate && f.id !== editingSlot.facultyId)
+      .sort((a, b) => (load.get(a.id) ?? 0) - (load.get(b.id) ?? 0));
+  }, [editingSlot, state.coFacultyPools, state.faculty, draftHook.slots]);
+
   // Load draft + locked slots
   useEffect(() => {
     if (!academicYear) return;
@@ -151,7 +166,25 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
       const room = state.rooms.find(r => r.id === editingSlot.roomId);
       changes.roomName = room?.name ?? editingSlot.roomName;
     }
+    if (editingSlot.coFacultyId !== selectedSlot.coFacultyId) {
+      changes.coFacultyId = editingSlot.coFacultyId;
+      const coFac = state.faculty.find(f => f.id === editingSlot.coFacultyId);
+      changes.coFacultyName = editingSlot.coFacultyId ? (coFac?.name ?? editingSlot.coFacultyName) : undefined;
+    }
     draftHook.editSlot(selectedSlot.id, changes);
+
+    // Keep the paired continuation period (2nd hour of a 2-period lab) in sync
+    if ('coFacultyId' in changes && selectedSlot.subjectType === 'lab' && !selectedSlot.isLabContinuation) {
+      const pair = draftHook.slots.find(s =>
+        s.isLabContinuation && s.day === selectedSlot.day &&
+        s.subjectName === selectedSlot.subjectName && s.batchName === selectedSlot.batchName &&
+        s.facultyId === selectedSlot.facultyId,
+      );
+      if (pair) {
+        draftHook.editSlot(pair.id, { coFacultyId: changes.coFacultyId, coFacultyName: changes.coFacultyName });
+      }
+    }
+
     setEditMode('none');
     setSelectedSlot(null);
     setEditingSlot(null);
@@ -400,7 +433,7 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
                   <XCircle size={16} />
                 </button>
               </div>
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className={cn('grid gap-4 mb-4', editingSlot.subjectType === 'lab' ? 'grid-cols-3' : 'grid-cols-2')}>
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Faculty</label>
                   <select
@@ -413,6 +446,24 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
                     ))}
                   </select>
                 </div>
+                {editingSlot.subjectType === 'lab' && (
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Co-Faculty</label>
+                    <select
+                      value={editingSlot.coFacultyId ?? ''}
+                      onChange={e => setEditingSlot(s => s ? { ...s, coFacultyId: e.target.value || undefined } : s)}
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    >
+                      <option value="">— None —</option>
+                      {coFacultyOptions.map(f => (
+                        <option key={f.id} value={f.id}>{f.name}</option>
+                      ))}
+                    </select>
+                    {coFacultyOptions.length === 0 && (
+                      <p className="text-[10px] text-slate-400 mt-1">No co-faculty pool configured for "{editingSlot.subjectName}" — see Co-Faculty Pools tab</p>
+                    )}
+                  </div>
+                )}
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Room</label>
                   <select

@@ -6,7 +6,7 @@ import { v4 as uuid } from 'uuid';
 import { supabase } from './lib/supabase';
 import type {
   AppState, Faculty, Section, Room, Subject,
-  ElectiveGroup, LabGroup, FrozenSlot,
+  ElectiveGroup, LabGroup, CoFacultyPool, FrozenSlot,
   TimetableSlot, ValidationResult, GenerationJob, JobStatus,
   SchedulerConfig,
 } from './types';
@@ -19,6 +19,7 @@ const defaultState: AppState = {
   subjects: [],
   electiveGroups: [],
   labGroups: [],
+  coFacultyPools: [],
   frozenSlots: [],
   currentTimetable: null,
   currentValidation: null,
@@ -44,6 +45,7 @@ export async function initializeStore() {
       { data: subjects },
       { data: electiveGroups },
       { data: labGroups },
+      { data: coFacultyPools },
       { data: frozenSlots },
       { data: appStateRows }
     ] = await Promise.all([
@@ -53,6 +55,7 @@ export async function initializeStore() {
       supabase.from('subjects').select('*'),
       supabase.from('elective_groups').select('*'),
       supabase.from('lab_groups').select('*'),
+      supabase.from('co_faculty_pools').select('*'),
       supabase.from('frozen_slots').select('*'),
       supabase.from('app_state').select('*')
     ]);
@@ -64,7 +67,8 @@ export async function initializeStore() {
         id: f.id,
         name: f.name,
         department: f.department,
-        maxHoursPerWeek: f.max_hours_per_week
+        maxHoursPerWeek: f.max_hours_per_week,
+        hasDoctorate: f.has_doctorate
       })),
       sections: sections || [],
       rooms: rooms || [],
@@ -94,6 +98,11 @@ export async function initializeStore() {
         sectionId: l.section_id,
         slotsPerWeek: l.slots_per_week,
         labs: l.labs
+      })),
+      coFacultyPools: (coFacultyPools || []).map(c => ({
+        id: c.id,
+        subjectName: c.subject_name,
+        facultyIds: c.faculty_ids
       })),
       frozenSlots: (frozenSlots || []).map(f => ({
         id: f.id,
@@ -162,14 +171,15 @@ export function getState(): AppState {
 }
 
 // ─── Faculty ─────────────────────────────────────────────
-export function addFaculty(name: string, department = 'CSE', maxHoursPerWeek = 20): Faculty {
-  const f: Faculty = { id: uuid(), name, department, maxHoursPerWeek };
+export function addFaculty(name: string, department = 'CSE', maxHoursPerWeek = 20, hasDoctorate = false): Faculty {
+  const f: Faculty = { id: uuid(), name, department, maxHoursPerWeek, hasDoctorate };
   state = { ...state, faculty: [...state.faculty, f] };
   saveToSupabase('faculty', {
     id: f.id,
     name: f.name,
     department: f.department,
-    max_hours_per_week: f.maxHoursPerWeek
+    max_hours_per_week: f.maxHoursPerWeek,
+    has_doctorate: f.hasDoctorate
   });
   notifyListeners();
   return f;
@@ -184,7 +194,8 @@ export function updateFaculty(id: string, updates: Partial<Omit<Faculty, 'id'>>)
     id: updated.id,
     name: updated.name,
     department: updated.department,
-    max_hours_per_week: updated.maxHoursPerWeek
+    max_hours_per_week: updated.maxHoursPerWeek,
+    has_doctorate: updated.hasDoctorate
   });
   notifyListeners();
 }
@@ -312,6 +323,38 @@ export function removeLabGroup(id: string) {
   notifyListeners();
 }
 
+// ─── Co-Faculty Pools ─────────────────────────────────────
+export function addCoFacultyPool(subjectName: string, facultyIds: string[]): CoFacultyPool {
+  const p: CoFacultyPool = { id: uuid(), subjectName, facultyIds };
+  state = { ...state, coFacultyPools: [...state.coFacultyPools, p] };
+  saveToSupabase('co_faculty_pools', {
+    id: p.id,
+    subject_name: p.subjectName,
+    faculty_ids: p.facultyIds
+  });
+  notifyListeners();
+  return p;
+}
+
+export function updateCoFacultyPool(id: string, updates: Partial<Omit<CoFacultyPool, 'id'>>) {
+  const p = state.coFacultyPools.find(cp => cp.id === id);
+  if (!p) return;
+  const updated = { ...p, ...updates };
+  state = { ...state, coFacultyPools: state.coFacultyPools.map(cp => cp.id === id ? updated : cp) };
+  saveToSupabase('co_faculty_pools', {
+    id: updated.id,
+    subject_name: updated.subjectName,
+    faculty_ids: updated.facultyIds
+  });
+  notifyListeners();
+}
+
+export function removeCoFacultyPool(id: string) {
+  state = { ...state, coFacultyPools: state.coFacultyPools.filter(p => p.id !== id) };
+  removeFromSupabase('co_faculty_pools', id);
+  notifyListeners();
+}
+
 // ─── Frozen Slots ─────────────────────────────────────────
 export function addFrozenSlot(data: Omit<FrozenSlot, 'id'>): FrozenSlot {
   const f: FrozenSlot = { id: uuid(), ...data };
@@ -429,6 +472,7 @@ export async function clearAllData() {
     supabase.from('subjects').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
     supabase.from('elective_groups').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
     supabase.from('lab_groups').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+    supabase.from('co_faculty_pools').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
     supabase.from('frozen_slots').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
     supabase.from('app_state').delete().neq('key', 'null'),
   ]);

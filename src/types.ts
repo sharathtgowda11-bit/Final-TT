@@ -49,6 +49,7 @@ export interface Faculty {
   name: string;
   department: string;
   maxHoursPerWeek?: number;
+  hasDoctorate?: boolean;
 }
 
 export interface Section {
@@ -124,6 +125,16 @@ export interface LabRotationSet {
   rotationMatrix: Record<string, Record<string, string>>; // batchName -> sessionIdx -> labName
 }
 
+// ─── Co-Faculty Pools ──────────────────────────────────────
+// Eligible co-faculty candidates for a given lab subject name
+// (assigned manually per-slot in the Draft Timetable, not during generation)
+
+export interface CoFacultyPool {
+  id: string;
+  subjectName: string;    // matches TimetableSlot.subjectName / LabEntry.labName, e.g. "Parallel Computing"
+  facultyIds: string[];   // eligible co-faculty candidates for this subject
+}
+
 // ─── Frozen Slots ──────────────────────────────────────────
 
 export interface FrozenSlot {
@@ -149,6 +160,8 @@ export interface TimetableSlot {
   subjectType: CourseType;
   facultyId: string;
   facultyName: string;
+  coFacultyId?: string;
+  coFacultyName?: string;
   sectionId: string;
   sectionName: string;
   semester: number;
@@ -278,6 +291,7 @@ export interface AppState {
   subjects: Subject[];
   electiveGroups: ElectiveGroup[];
   labGroups: LabGroup[];
+  coFacultyPools: CoFacultyPool[];
   frozenSlots: FrozenSlot[];
   currentTimetable: TimetableSlot[] | null;
   currentValidation: ValidationResult | null;

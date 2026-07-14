@@ -123,10 +123,11 @@ export function TimetableGrid({
                                   isDraggable && 'cursor-grab active:cursor-grabbing',
                                   isBeingDragged && 'opacity-40 scale-95',
                                 )}
-                                title={`${s.subjectName} | ${s.facultyName} | ${s.sectionName}${s.batchName ? ` [${s.batchName}]` : ''}`}
+                                title={`${s.subjectName} | ${s.facultyName}${s.coFacultyName ? ` + ${s.coFacultyName}` : ''} | ${s.sectionName}${s.batchName ? ` [${s.batchName}]` : ''}`}
                               >
                                 <div className="font-bold truncate text-[10px] leading-snug tracking-tight">{s.subjectName}</div>
                                 {viewType !== 'faculty' && <div className="font-medium opacity-80 truncate text-[9px] mt-0.5">{s.facultyName}</div>}
+                                {s.coFacultyName && <div className="font-medium opacity-70 truncate text-[9px] mt-0.5">+ {s.coFacultyName}</div>}
                                 {viewType !== 'section' && <div className="font-medium opacity-80 truncate text-[9px] mt-0.5">{s.sectionName}</div>}
                                 {s.batchName && <div className="font-bold opacity-70 text-[8px] bg-white/40 inline-block px-1 rounded mt-0.5">[{s.batchName}]</div>}
                                 {s.roomName && viewType !== 'room' && <div className="font-medium opacity-80 text-[8px] mt-0.5 flex items-center gap-0.5"><span className="opacity-50 text-[10px]">📍</span>{s.roomName}</div>}

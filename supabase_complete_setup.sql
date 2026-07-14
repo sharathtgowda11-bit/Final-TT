@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS faculty (
   name            TEXT NOT NULL,
   department      TEXT NOT NULL DEFAULT 'CSE',
   max_hours_per_week INTEGER DEFAULT 20,
+  has_doctorate   BOOLEAN DEFAULT false,
   created_at      TIMESTAMPTZ DEFAULT now()
 );
 
@@ -70,6 +71,14 @@ CREATE TABLE IF NOT EXISTS lab_groups (
   section_id      UUID REFERENCES sections(id) ON DELETE CASCADE,
   slots_per_week  INTEGER NOT NULL DEFAULT 1,
   labs            JSONB NOT NULL DEFAULT '[]',
+  created_at      TIMESTAMPTZ DEFAULT now()
+);
+
+-- Co-Faculty Pools (eligible co-faculty candidates per lab subject name)
+CREATE TABLE IF NOT EXISTS co_faculty_pools (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  subject_name    TEXT NOT NULL UNIQUE,
+  faculty_ids     JSONB NOT NULL DEFAULT '[]',
   created_at      TIMESTAMPTZ DEFAULT now()
 );
 
@@ -265,6 +274,7 @@ ALTER TABLE rooms             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE subjects          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE elective_groups   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lab_groups        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE co_faculty_pools  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE frozen_slots      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE app_state         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE timetables        ENABLE ROW LEVEL SECURITY;
@@ -277,7 +287,7 @@ DECLARE
 BEGIN
   FOREACH tbl IN ARRAY ARRAY[
     'faculty', 'sections', 'rooms', 'subjects',
-    'elective_groups', 'lab_groups', 'frozen_slots', 'app_state',
+    'elective_groups', 'lab_groups', 'co_faculty_pools', 'frozen_slots', 'app_state',
     'timetables', 'section_classrooms'
   ] LOOP
     pol := 'Allow all operations on ' || tbl;

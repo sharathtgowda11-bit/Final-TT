@@ -1414,29 +1414,35 @@ export function validateTimetable(
   let sectionClashCount = 0;
   let saturdayViolations = 0;
 
-  // ── Faculty clash detection ──
-  const facultySlotMap = new Map<string, TimetableSlot[]>();
-  for (const s of slots) {
-    const fac = appState.faculty.find(f => f.id === s.facultyId);
-    if (isExternalFaculty(fac, s.subjectName)) continue; // Completely ignore non-CSE faculty for clash detection
-
-    const key = `${s.facultyId}|${s.day}|${s.period}`;
+  // ── Faculty clash detection (covers main faculty AND co-faculty) ──
+  const facultySlotMap = new Map<string, { slot: TimetableSlot; facName: string }[]>();
+  const addFacultyOccurrence = (facId: string | undefined, facName: string | undefined, s: TimetableSlot) => {
+    if (!facId) return;
+    const fac = appState.faculty.find(f => f.id === facId);
+    if (isExternalFaculty(fac, s.subjectName)) return; // Completely ignore non-CSE faculty for clash detection
+    const key = `${facId}|${s.day}|${s.period}`;
     if (!facultySlotMap.has(key)) facultySlotMap.set(key, []);
-    facultySlotMap.get(key)!.push(s);
+    facultySlotMap.get(key)!.push({ slot: s, facName: facName || facId });
+  };
+  for (const s of slots) {
+    addFacultyOccurrence(s.facultyId, s.facultyName, s);
+    if (s.coFacultyId && s.coFacultyId !== s.facultyId) {
+      addFacultyOccurrence(s.coFacultyId, s.coFacultyName, s);
+    }
   }
   for (const [, group] of facultySlotMap) {
     // Elective batches taught by different faculty at same slot = OK
-    // But same faculty at same slot = clash
-    const uniqueFacSubj = new Set(group.map(s => `${s.subjectName}|${s.batchName || ''}`));
+    // But same faculty (as main or co-faculty) at same slot = clash
+    const uniqueFacSubj = new Set(group.map(g => `${g.slot.subjectName}|${g.slot.batchName || ''}`));
     if (uniqueFacSubj.size > 1) {
       facultyClashCount++;
-      const s = group[0];
-      const msg = `Faculty clash: ${s.facultyName} at ${s.day} ${s.period} — ${group.map(g => g.subjectName).join(' vs ')}`;
+      const first = group[0];
+      const msg = `Faculty clash: ${first.facName} at ${first.slot.day} ${first.slot.period} — ${group.map(g => g.slot.subjectName).join(' vs ')}`;
       errors.push(msg);
       clashDetails.push({
-        type: 'faculty', day: s.day, period: s.period,
-        entityName: s.facultyName,
-        subjects: group.map(g => g.subjectName),
+        type: 'faculty', day: first.slot.day, period: first.slot.period,
+        entityName: first.facName,
+        subjects: group.map(g => g.slot.subjectName),
       });
     }
   }

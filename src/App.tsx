@@ -2,7 +2,7 @@
 // CONSTRAINT-BASED ACADEMIC TIMETABLE GENERATOR
 // Complete Admin Dashboard — CSE Department
 // ============================================================
-import { useState, useSyncExternalStore, useCallback, useRef, useEffect } from 'react';
+import { useState, useSyncExternalStore, useCallback, useRef, useEffect, useMemo } from 'react';
 import {
   DAYS, WEEKDAY_PERIODS, SATURDAY_PERIODS, PERIOD_TIMES,
   DEFAULT_SCHEDULER_CONFIG,
@@ -12,12 +12,13 @@ import {
 } from './types';
 import {
   getState, subscribe,
-  addFaculty, removeFaculty,
+  addFaculty, removeFaculty, updateFaculty,
   addSection, removeSection,
   addRoom, removeRoom,
   addSubject, removeSubject,
   addElectiveGroup, removeElectiveGroup, updateElectiveGroup,
   addLabGroup, removeLabGroup,
+  addCoFacultyPool, updateCoFacultyPool,
   addFrozenSlot, removeFrozenSlot,
   setTimetable, loadSampleData, clearAllData,
   updateConfig, startJob, appendJobLog, finishJob, updateJob,
@@ -53,7 +54,7 @@ function useStore(): AppState {
 // ─── Tab System ───────────────────────────────────────────
 type TabKey =
   | 'dashboard' | 'faculty' | 'sections' | 'rooms'
-  | 'subjects' | 'electives' | 'labs' | 'frozen'
+  | 'subjects' | 'electives' | 'labs' | 'coFacultyPools' | 'frozen'
   | 'config' | 'generate' | 'timetable' | 'validation'
   | 'generate-semester' | 'draft' | 'semester-status' | 'combined-view'
   | 'workload';
@@ -66,6 +67,7 @@ const TABS: { key: TabKey; label: string; icon: React.ReactNode; group?: string 
   { key: 'subjects', label: 'Subjects', icon: <BookOpen size={16} />, group: 'Data Entry' },
   { key: 'electives', label: 'Electives', icon: <GitBranch size={16} />, group: 'Data Entry' },
   { key: 'labs', label: 'Labs', icon: <FlaskConical size={16} />, group: 'Data Entry' },
+  { key: 'coFacultyPools', label: 'Co-Faculty Pools', icon: <Activity size={16} />, group: 'Data Entry' },
   { key: 'frozen', label: 'Frozen Slots', icon: <Lock size={16} />, group: 'Data Entry' },
   { key: 'config', label: 'Scheduler Config', icon: <Settings size={16} />, group: 'Engine' },
   { key: 'generate', label: 'Generate', icon: <Zap size={16} />, group: 'Engine' },
@@ -191,6 +193,7 @@ export default function App() {
           {activeTab === 'subjects' && <SubjectsPanel state={state} />}
           {activeTab === 'electives' && <ElectivesPanel state={state} />}
           {activeTab === 'labs' && <LabsPanel state={state} />}
+          {activeTab === 'coFacultyPools' && <CoFacultyPoolsPanel state={state} />}
           {activeTab === 'frozen' && <FrozenPanel state={state} />}
           {activeTab === 'config' && <ConfigPanel state={state} />}
           {activeTab === 'generate' && <GeneratePanel state={state} setActiveTab={setActiveTab} />}
@@ -533,11 +536,13 @@ function FacultyPanel({ state }: { state: AppState }) {
   const [name, setName] = useState('');
   const [dept, setDept] = useState('CSE');
   const [maxHrs, setMaxHrs] = useState('20');
+  const [hasDoctorate, setHasDoctorate] = useState(false);
 
   const handleAdd = () => {
     if (!name.trim()) return;
-    addFaculty(name.trim(), dept || 'CSE', parseInt(maxHrs) || 20);
+    addFaculty(name.trim(), dept || 'CSE', parseInt(maxHrs) || 20, hasDoctorate);
     setName('');
+    setHasDoctorate(false);
   };
 
   // Compute workload from current timetable
@@ -566,6 +571,14 @@ function FacultyPanel({ state }: { state: AppState }) {
           <Input label="Department" value={dept} onChange={setDept} placeholder="CSE" />
           <Input label="Max Hours/Week" value={maxHrs} onChange={setMaxHrs} type="number" placeholder="20" />
         </div>
+        <label className="flex items-center gap-2 cursor-pointer mb-4 w-max">
+          <input
+            type="checkbox" checked={hasDoctorate}
+            onChange={e => setHasDoctorate(e.target.checked)}
+            className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 transition-all cursor-pointer"
+          />
+          <span className="text-xs font-medium text-slate-600 select-none">Has Doctorate (PhD)</span>
+        </label>
         <Btn onClick={handleAdd} disabled={!name.trim()}><Plus size={12} /> Add Faculty</Btn>
       </Card>
 
@@ -578,6 +591,7 @@ function FacultyPanel({ state }: { state: AppState }) {
                 <th className="text-left py-3 px-4 font-semibold">Name</th>
                 <th className="text-left py-3 px-4 font-semibold">Department</th>
                 <th className="text-left py-3 px-4 font-semibold">Max Hrs</th>
+                <th className="text-left py-3 px-4 font-semibold">PhD</th>
                 <th className="text-left py-3 px-4 font-semibold">Scheduled</th>
                 <th className="text-right py-3 px-4 font-semibold">Actions</th>
               </tr>
@@ -597,6 +611,14 @@ function FacultyPanel({ state }: { state: AppState }) {
                     </td>
                     <td className="py-3 px-4 text-slate-500 font-medium">{f.maxHoursPerWeek || '—'}</td>
                     <td className="py-3 px-4">
+                      <input
+                        type="checkbox" checked={!!f.hasDoctorate}
+                        onChange={e => updateFaculty(f.id, { hasDoctorate: e.target.checked })}
+                        className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 transition-all cursor-pointer"
+                        title="Has Doctorate (PhD)"
+                      />
+                    </td>
+                    <td className="py-3 px-4">
                       {state.currentTimetable ? (
                         <div className="flex items-center gap-2">
                           <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -614,7 +636,7 @@ function FacultyPanel({ state }: { state: AppState }) {
                 );
               })}
               {state.faculty.length === 0 && (
-                <tr><td colSpan={6}><EmptyState message="No faculty added yet" /></td></tr>
+                <tr><td colSpan={7}><EmptyState message="No faculty added yet" /></td></tr>
               )}
             </tbody>
           </table>
@@ -1422,6 +1444,121 @@ function LabsPanel({ state }: { state: AppState }) {
         })}
         {state.labGroups.length === 0 && <Card><EmptyState message="No lab groups configured" /></Card>}
       </div>
+    </div>
+  );
+}
+
+// ─── Co-Faculty Pools Panel ────────────────────────────────
+function CoFacultyPoolsPanel({ state }: { state: AppState }) {
+  const subjectNames = useMemo(() => {
+    const names = new Set<string>();
+    for (const lg of state.labGroups) {
+      for (const l of lg.labs) {
+        if (l.labName.trim()) names.add(l.labName.trim());
+      }
+    }
+    for (const eg of state.electiveGroups) {
+      for (const b of eg.batches) {
+        if (b.hasLab && b.subjectName.trim()) names.add(b.subjectName.trim());
+      }
+    }
+    return [...names].sort((a, b) => a.localeCompare(b));
+  }, [state.labGroups, state.electiveGroups]);
+
+  // facultyId -> subject names they're already the main assigned faculty for
+  const assignedSubjectsByFaculty = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    const add = (facultyId: string | undefined, subjectName: string) => {
+      if (!facultyId || !subjectName) return;
+      if (!map.has(facultyId)) map.set(facultyId, new Set());
+      map.get(facultyId)!.add(subjectName);
+    };
+    for (const lg of state.labGroups) {
+      for (const l of lg.labs) add(l.facultyId, l.labName.trim());
+    }
+    for (const eg of state.electiveGroups) {
+      for (const b of eg.batches) if (b.hasLab) add(b.facultyId, b.subjectName.trim());
+    }
+    return map;
+  }, [state.labGroups, state.electiveGroups]);
+
+  const handleToggle = (subjectName: string, facultyId: string) => {
+    const pool = state.coFacultyPools.find(p => p.subjectName === subjectName);
+    if (!pool) {
+      addCoFacultyPool(subjectName, [facultyId]);
+      return;
+    }
+    const updated = pool.facultyIds.includes(facultyId)
+      ? pool.facultyIds.filter(id => id !== facultyId)
+      : [...pool.facultyIds, facultyId];
+    updateCoFacultyPool(pool.id, { facultyIds: updated });
+  };
+
+  return (
+    <div>
+      <PageHeader
+        title="Co-Faculty Pools"
+        subtitle="Define eligible co-faculty candidates per lab subject — used when assigning a co-faculty in the Draft Timetable"
+        icon={<Activity size={18} className="text-emerald-500" />}
+        badge={{ text: `${subjectNames.length} lab subjects`, color: 'bg-emerald-500/10 text-emerald-600' }}
+      />
+
+      {subjectNames.length === 0 ? (
+        <Card><EmptyState message="No lab subjects configured yet — add a Lab Group or an elective with a lab first" /></Card>
+      ) : (
+        <div className="space-y-4">
+          {subjectNames.map(name => {
+            const pool = state.coFacultyPools.find(p => p.subjectName === name);
+            const memberIds = new Set(pool?.facultyIds ?? []);
+            const sortedFaculty = [...state.faculty].sort((a, b) => {
+              const aAssigned = assignedSubjectsByFaculty.get(a.id)?.has(name) ? 0 : 1;
+              const bAssigned = assignedSubjectsByFaculty.get(b.id)?.has(name) ? 0 : 1;
+              if (aAssigned !== bAssigned) return aAssigned - bAssigned;
+              return a.name.localeCompare(b.name);
+            });
+            return (
+              <Card key={name}>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-bold text-slate-800">{name}</h3>
+                  <Badge color="bg-slate-100 text-slate-500 border border-slate-200">
+                    {memberIds.size} eligible
+                  </Badge>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {sortedFaculty.map(f => {
+                    const subjects = [...(assignedSubjectsByFaculty.get(f.id) ?? [])];
+                    return (
+                      <label
+                        key={f.id}
+                        className={cn(
+                          'flex items-center gap-2 px-3 py-1.5 rounded-lg border cursor-pointer transition-colors text-xs',
+                          memberIds.has(f.id)
+                            ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                            : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300',
+                        )}
+                      >
+                        <input
+                          type="checkbox" checked={memberIds.has(f.id)}
+                          onChange={() => handleToggle(name, f.id)}
+                          className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span className="font-medium">{f.name}</span>
+                        {subjects.length > 0 && (
+                          <span className="text-[9px] text-slate-400">({subjects.join(', ')})</span>
+                        )}
+                        {f.hasDoctorate && <span className="text-[9px] text-slate-400">(PhD)</span>}
+                      </label>
+                    );
+                  })}
+                  {state.faculty.length === 0 && (
+                    <p className="text-xs text-slate-400">No faculty added yet</p>
+                  )}
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
