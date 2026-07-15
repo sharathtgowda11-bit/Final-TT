@@ -265,7 +265,8 @@ $$ LANGUAGE plpgsql;
 
 -- ─────────────────────────────────────────────────────────────
 -- 4. ROW LEVEL SECURITY
--- Permissive policies — tighten later if you add auth
+-- Requires an authenticated Supabase Auth session (see
+-- supabase_auth_migration.sql for the login setup this pairs with)
 -- ─────────────────────────────────────────────────────────────
 
 ALTER TABLE faculty           ENABLE ROW LEVEL SECURITY;
@@ -290,13 +291,13 @@ BEGIN
     'elective_groups', 'lab_groups', 'co_faculty_pools', 'frozen_slots', 'app_state',
     'timetables', 'section_classrooms'
   ] LOOP
-    pol := 'Allow all operations on ' || tbl;
+    pol := 'Allow authenticated operations on ' || tbl;
     IF NOT EXISTS (
       SELECT 1 FROM pg_policies
       WHERE tablename = tbl AND policyname = pol
     ) THEN
       EXECUTE format(
-        'CREATE POLICY %I ON %I FOR ALL USING (true) WITH CHECK (true)',
+        'CREATE POLICY %I ON %I FOR ALL USING (auth.role() = ''authenticated'') WITH CHECK (auth.role() = ''authenticated'')',
         pol, tbl
       );
     END IF;

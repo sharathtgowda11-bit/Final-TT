@@ -1590,11 +1590,12 @@ export function validateTimetable(
     }
   }
 
-  // ── Workload balance ──
+  // ── Workload balance (covers main faculty AND co-faculty) ──
   const workloadMap = new Map<string, number>();
   for (const s of slots) {
     if (s.isLabContinuation) continue;
     workloadMap.set(s.facultyId, (workloadMap.get(s.facultyId) || 0) + 1);
+    if (s.coFacultyId) workloadMap.set(s.coFacultyId, (workloadMap.get(s.coFacultyId) || 0) + 1);
   }
   const workloadBalance = appState.faculty.map(f => ({
     facultyName: f.name,
@@ -1613,11 +1614,12 @@ export function validateTimetable(
     }
   }
 
-  // ── Morning slot violations ──
+  // ── Morning slot violations (covers main faculty AND co-faculty) ──
   const morningMap = new Map<string, number>();
   for (const s of slots) {
     if (isP1(s.period)) {
       morningMap.set(s.facultyId, (morningMap.get(s.facultyId) || 0) + 1);
+      if (s.coFacultyId) morningMap.set(s.coFacultyId, (morningMap.get(s.coFacultyId) || 0) + 1);
     }
   }
   for (const [fid, count] of morningMap) {

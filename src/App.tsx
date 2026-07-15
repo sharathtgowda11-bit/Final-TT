@@ -7,7 +7,7 @@ import {
   DAYS, WEEKDAY_PERIODS, SATURDAY_PERIODS, PERIOD_TIMES,
   DEFAULT_SCHEDULER_CONFIG,
   type Day, type Period,
-  type ElectiveBatch, type LabEntry, type AppState,
+  type ElectiveBatch, type LabEntry, type AppState, type Subject,
   type SchedulerConfig, type ElectiveGroup, type CourseType,
 } from './types';
 import {
@@ -15,15 +15,15 @@ import {
   addFaculty, removeFaculty, updateFaculty,
   addSection, removeSection,
   addRoom, removeRoom,
-  addSubject, removeSubject,
+  addSubject, removeSubject, updateSubject,
   addElectiveGroup, removeElectiveGroup, updateElectiveGroup,
   addLabGroup, removeLabGroup,
   addCoFacultyPool, updateCoFacultyPool,
   addFrozenSlot, removeFrozenSlot,
-  setTimetable, loadSampleData, clearAllData,
+  setTimetable, loadSampleData,
   updateConfig, startJob, appendJobLog, finishJob, updateJob,
 } from './store';
-import { generateTimetable } from './scheduler';
+import { generateTimetable, validateTimetable } from './scheduler';
 import { exportToPDF, exportToExcel } from './export';
 import { TimetableGrid } from './components/TimetableGrid';
 import type { TimetableView } from './components/TimetableGrid';
@@ -33,6 +33,11 @@ import { SemesterStatusPanel } from './components/SemesterStatusPanel';
 import { CombinedLockedView } from './components/CombinedLockedView';
 import { FacultyWorkloadTable } from './components/FacultyWorkloadTable';
 import { fetchLockedTimetables } from './services/semesterTimetableService';
+import { useSemesterTimetable } from './hooks/useSemesterTimetable';
+import { computeActualFacultyLoad } from './utils/workload';
+import { useAuth } from './hooks/useAuth';
+import { LoginPage } from './components/LoginPage';
+import { supabase } from './lib/supabase';
 
 import { v4 as uuid } from 'uuid';
 import {
@@ -42,7 +47,7 @@ import {
   Play, StopCircle, RefreshCw, GitBranch,
   ChevronDown, Save, Upload, Edit, PlusCircle,
   FileDown, FileSpreadsheet, Zap, Eye, Database, Settings, RotateCcw,
-  TrendingUp, Clock, Shield, Layers, Info, Star, Activity,
+  TrendingUp, Clock, Shield, Layers, Info, Star, Activity, LogOut,
 } from 'lucide-react';
 import { cn } from './utils/cn';
 
@@ -85,13 +90,27 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabKey>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  const { loading: authLoading, isAuthenticated } = useAuth();
   const state = useStore();
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     import('./store').then(m => m.initializeStore()).then(() => setIsInitialized(true));
-  }, []);
+  }, [isAuthenticated]);
 
   const groups = ['Overview', 'Data Entry', 'Engine', 'Semester', 'Output'];
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#1A192B] flex items-center justify-center font-sans">
+        <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
 
   if (!isInitialized) {
     return (
@@ -173,6 +192,19 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {/* Sign Out */}
+        <button
+          onClick={() => supabase.auth.signOut()}
+          title={!sidebarOpen ? 'Sign Out' : undefined}
+          className={cn(
+            'flex items-center gap-2.5 px-5 py-3 border-t border-white/5 text-slate-400 hover:text-red-400 hover:bg-white/5 transition-colors text-[12px] font-medium',
+            !sidebarOpen && 'justify-center px-0',
+          )}
+        >
+          <LogOut size={14} className="flex-shrink-0" />
+          {sidebarOpen && <span>Sign Out</span>}
+        </button>
 
         {/* Collapse toggle */}
         <button
@@ -394,11 +426,6 @@ function DashboardPanel({ state, setActiveTab }: { state: AppState; setActiveTab
             }}>
               <Database size={12} /> Load Sample Data
             </Btn>
-            <Btn variant="danger" onClick={() => {
-              if (window.confirm('Clear ALL data? This cannot be undone.')) clearAllData();
-            }}>
-              <Trash2 size={12} /> Clear All
-            </Btn>
           </div>
         }
       />
@@ -545,15 +572,22 @@ function FacultyPanel({ state }: { state: AppState }) {
     setHasDoctorate(false);
   };
 
-  // Compute workload from current timetable
-  const workload = new Map<string, number>();
-  if (state.currentTimetable) {
-    for (const s of state.currentTimetable) {
-      if (!s.isLabContinuation) {
-        workload.set(s.facultyId, (workload.get(s.facultyId) || 0) + 1);
-      }
-    }
-  }
+  // Compute workload (incl. co-faculty) from locked semester timetables
+  const currentYear = new Date().getFullYear();
+  const [academicYear, setAcademicYear] = useState(`${currentYear}-${String(currentYear + 1).slice(2)}`);
+  const semHook = useSemesterTimetable(academicYear);
+
+  useEffect(() => {
+    if (academicYear) semHook.refresh();
+  }, [academicYear]);
+
+  const lockedSlots = useMemo(
+    () => semHook.timetables.filter(t => t.status === 'LOCKED').flatMap(t => t.slots),
+    [semHook.timetables],
+  );
+
+  const workload = computeActualFacultyLoad(lockedSlots);
+  const hasScheduleData = lockedSlots.length > 0;
 
   return (
     <div>
@@ -562,6 +596,18 @@ function FacultyPanel({ state }: { state: AppState }) {
         subtitle="Add and manage teaching staff with department assignments"
         icon={<Users size={18} className="text-blue-400" />}
         badge={{ text: `${state.faculty.length} members`, color: 'bg-blue-500/10 text-blue-400' }}
+        actions={
+          <div>
+            <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wide">Academic Year (Scheduled hrs)</label>
+            <input
+              type="text"
+              value={academicYear}
+              onChange={e => setAcademicYear(e.target.value)}
+              placeholder="2026-27"
+              className="w-32 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors shadow-sm"
+            />
+          </div>
+        }
       />
 
       <Card className="mb-4">
@@ -619,7 +665,7 @@ function FacultyPanel({ state }: { state: AppState }) {
                       />
                     </td>
                     <td className="py-3 px-4">
-                      {state.currentTimetable ? (
+                      {hasScheduleData ? (
                         <div className="flex items-center gap-2">
                           <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
                             <div className={cn('h-full rounded-full', pct > 80 ? 'bg-orange-500' : 'bg-blue-500')}
@@ -795,6 +841,7 @@ function RoomsPanel({ state }: { state: AppState }) {
 
 // ─── Subjects Panel ───────────────────────────────────────
 function SubjectsPanel({ state }: { state: AppState }) {
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [semester, setSemester] = useState('4');
@@ -815,15 +862,35 @@ function SubjectsPanel({ state }: { state: AppState }) {
     );
   };
 
+  const resetForm = () => {
+    setEditingId(null);
+    setName(''); setCode(''); setSelectedFaculty([]); setType('core'); setHours('4');
+  };
+
+  const handleEdit = (s: Subject) => {
+    setEditingId(s.id);
+    setName(s.name);
+    setCode(s.code);
+    setSemester(String(s.semester));
+    setType(s.type);
+    setHours(String(s.hoursPerWeek));
+    setSelectedFaculty([...s.facultyIds]);
+  };
+
   const handleAdd = () => {
     if (!name.trim() || !code.trim() || selectedFaculty.length === 0) return;
-    addSubject({
+    const data = {
       name: name.trim(), code: code.trim(),
       semester: parseInt(semester), type,
       hoursPerWeek: type === 'lab' ? 2 : (parseInt(hours) || 4),
       facultyIds: selectedFaculty,
-    });
-    setName(''); setCode(''); setSelectedFaculty([]); setType('core'); setHours('4');
+    };
+    if (editingId) {
+      updateSubject(editingId, data);
+    } else {
+      addSubject(data);
+    }
+    resetForm();
   };
 
   // Compute faculty→section mapping preview
@@ -845,7 +912,7 @@ function SubjectsPanel({ state }: { state: AppState }) {
       />
 
       <Card className="mb-5">
-        <h3 className="text-xs font-semibold text-slate-500 mb-4 uppercase tracking-wider">Add Subject</h3>
+        <h3 className="text-xs font-semibold text-slate-500 mb-4 uppercase tracking-wider">{editingId ? 'Edit Subject' : 'Add Subject'}</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
           <Input label="Subject Name" value={name} onChange={setName} placeholder="Machine Learning" required />
           <Input label="Code" value={code} onChange={setCode} placeholder="CS401" required />
@@ -904,9 +971,16 @@ function SubjectsPanel({ state }: { state: AppState }) {
           </div>
         )}
 
-        <Btn onClick={handleAdd} disabled={!name.trim() || !code.trim() || selectedFaculty.length === 0}>
-          <Plus size={14} /> Add Subject
-        </Btn>
+        <div className="flex gap-2">
+          <Btn onClick={handleAdd} disabled={!name.trim() || !code.trim() || selectedFaculty.length === 0}>
+            {editingId ? <><Edit size={14} /> Update Subject</> : <><Plus size={14} /> Add Subject</>}
+          </Btn>
+          {editingId && (
+            <Btn variant="secondary" onClick={resetForm}>
+              Cancel
+            </Btn>
+          )}
+        </div>
       </Card>
 
       <Card>
@@ -941,6 +1015,7 @@ function SubjectsPanel({ state }: { state: AppState }) {
                     </div>
                   </td>
                   <td className="py-3 px-4 text-right">
+                    <Btn variant="ghost" size="sm" onClick={() => handleEdit(s)}><Edit size={12} className="text-blue-400" /></Btn>
                     <Btn variant="ghost" size="sm" onClick={() => removeSubject(s.id)}><Trash2 size={12} /></Btn>
                   </td>
                 </tr>
@@ -2325,17 +2400,41 @@ function TimetablePanel({ state }: { state: AppState }) {
   const [semFilter, setSemFilter] = useState('');
   const [expandFacMapping, setExpandFacMapping] = useState(false);
 
-  const tt = state.currentTimetable;
+  const currentYear = new Date().getFullYear();
+  const [academicYear, setAcademicYear] = useState(`${currentYear}-${String(currentYear + 1).slice(2)}`);
+  const hook = useSemesterTimetable(academicYear);
 
-  if (!tt || tt.length === 0) {
+  useEffect(() => {
+    if (academicYear) hook.refresh();
+  }, [academicYear]);
+
+  const tt = useMemo(
+    () => hook.timetables.filter(t => t.status === 'LOCKED').flatMap(t => t.slots),
+    [hook.timetables],
+  );
+
+  const academicYearControl = (
+    <div>
+      <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wide">Academic Year</label>
+      <input
+        type="text"
+        value={academicYear}
+        onChange={e => setAcademicYear(e.target.value)}
+        placeholder="2026-27"
+        className="w-32 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors shadow-sm"
+      />
+    </div>
+  );
+
+  if (tt.length === 0) {
     return (
       <div>
-        <PageHeader title="View Timetable" subtitle="Generate a timetable to view it" icon={<Calendar size={18} className="text-indigo-400" />} />
+        <PageHeader title="View Timetable" subtitle="Lock a semester timetable to view it here" icon={<Calendar size={18} className="text-indigo-400" />} actions={academicYearControl} />
         <Card>
           <div className="text-center py-16">
             <Calendar size={40} className="text-gray-700 mx-auto mb-3" />
-            <p className="text-sm text-gray-500 mb-2">No timetable generated yet</p>
-            <p className="text-xs text-gray-600">Go to the Generate tab and run the scheduler</p>
+            <p className="text-sm text-gray-500 mb-2">No locked timetable for {academicYear}</p>
+            <p className="text-xs text-gray-600">Go to Generate Semester, build a draft, then lock it</p>
           </div>
         </Card>
       </div>
@@ -2349,9 +2448,12 @@ function TimetablePanel({ state }: { state: AppState }) {
     tt.filter(s => !s.electiveGroupId).map(s => [s.sectionId, { value: s.sectionId, label: `${s.sectionName} (Sem ${s.semester})` }])
   ).values()];
 
-  const uniqueFaculty = [...new Map(
-    tt.map(s => [s.facultyId, { value: s.facultyId, label: s.facultyName }])
-  ).values()];
+  const facultyEntries: [string, { value: string; label: string }][] = [];
+  for (const s of tt) {
+    facultyEntries.push([s.facultyId, { value: s.facultyId, label: s.facultyName }]);
+    if (s.coFacultyId) facultyEntries.push([s.coFacultyId, { value: s.coFacultyId, label: s.coFacultyName || s.coFacultyId }]);
+  }
+  const uniqueFaculty = [...new Map(facultyEntries).values()];
 
   const uniqueRooms = [...new Map(
     tt.filter(s => s.roomId).map(s => [s.roomId!, { value: s.roomId!, label: s.roomName! }])
@@ -2364,7 +2466,7 @@ function TimetablePanel({ state }: { state: AppState }) {
   let filtered = tt;
   if (effectiveId) {
     if (viewType === 'section') filtered = tt.filter(s => s.sectionId === effectiveId || (s.electiveGroupId && s.semester === (state.sections.find(sec => sec.id === effectiveId)?.semester)));
-    else if (viewType === 'faculty') filtered = tt.filter(s => s.facultyId === effectiveId);
+    else if (viewType === 'faculty') filtered = tt.filter(s => s.facultyId === effectiveId || s.coFacultyId === effectiveId);
     else filtered = tt.filter(s => s.roomId === effectiveId);
   }
 
@@ -2382,9 +2484,10 @@ function TimetablePanel({ state }: { state: AppState }) {
     <div>
       <PageHeader
         title="Timetable Viewer"
-        subtitle="Section / Faculty / Room grid views"
+        subtitle="Section / Faculty / Room grid views — locked semesters"
         icon={<Calendar size={18} className="text-indigo-500" />}
         badge={{ text: `${tt.length} total slots`, color: 'bg-indigo-50 text-indigo-600 border border-indigo-100' }}
+        actions={academicYearControl}
       />
 
       {/* Controls */}
@@ -2546,18 +2649,45 @@ function TimetablePanel({ state }: { state: AppState }) {
 
 // ─── Validation Panel ─────────────────────────────────────
 function ValidationPanel({ state }: { state: AppState }) {
-  const v = state.currentValidation;
   const [activeSection, setActiveSection] = useState<'errors' | 'warnings' | 'workload' | 'coverage' | 'clashes'>('errors');
 
-  if (!v) {
+  const currentYear = new Date().getFullYear();
+  const [academicYear, setAcademicYear] = useState(`${currentYear}-${String(currentYear + 1).slice(2)}`);
+  const hook = useSemesterTimetable(academicYear);
+
+  useEffect(() => {
+    if (academicYear) hook.refresh();
+  }, [academicYear]);
+
+  const lockedSlots = useMemo(
+    () => hook.timetables.filter(t => t.status === 'LOCKED').flatMap(t => t.slots),
+    [hook.timetables],
+  );
+
+  const v = useMemo(() => validateTimetable(lockedSlots, state), [lockedSlots, state]);
+
+  const academicYearControl = (
+    <div>
+      <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wide">Academic Year</label>
+      <input
+        type="text"
+        value={academicYear}
+        onChange={e => setAcademicYear(e.target.value)}
+        placeholder="2026-27"
+        className="w-32 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors shadow-sm"
+      />
+    </div>
+  );
+
+  if (lockedSlots.length === 0) {
     return (
       <div>
-        <PageHeader title="Validation Report" subtitle="Run the scheduler first" icon={<Shield size={18} className="text-green-400" />} />
+        <PageHeader title="Validation Report" subtitle="Lock a semester timetable to see validation results" icon={<Shield size={18} className="text-green-400" />} actions={academicYearControl} />
         <Card>
           <div className="text-center py-16">
             <Shield size={40} className="text-gray-700 mx-auto mb-3" />
-            <p className="text-sm text-gray-500">No validation report available</p>
-            <p className="text-xs text-gray-600 mt-1">Generate a timetable to see validation results</p>
+            <p className="text-sm text-gray-500">No locked timetable for {academicYear}</p>
+            <p className="text-xs text-gray-600 mt-1">Go to Generate Semester, build a draft, then lock it</p>
           </div>
         </Card>
       </div>
@@ -2576,12 +2706,13 @@ function ValidationPanel({ state }: { state: AppState }) {
     <div>
       <PageHeader
         title="Validation Report"
-        subtitle="Comprehensive constraint verification results"
+        subtitle="Comprehensive constraint verification results — locked semesters"
         icon={<Shield size={18} className="text-green-400" />}
         badge={v.valid
           ? { text: 'VALID', color: 'bg-green-500/10 text-green-400' }
           : { text: 'INVALID', color: 'bg-red-500/10 text-red-400' }
         }
+        actions={academicYearControl}
       />
 
       {/* Overall status */}

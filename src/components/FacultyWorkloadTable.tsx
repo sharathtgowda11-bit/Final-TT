@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { FileDown, Users, Info } from 'lucide-react';
 import type { AppState, TimetableSlot } from '../types';
 import { cn } from '../utils/cn';
+import { useSemesterTimetable } from '../hooks/useSemesterTimetable';
 
 interface WorkloadRow {
   slNo: number;
@@ -24,12 +25,11 @@ function buildActualRows(slots: TimetableSlot[]): { rows: WorkloadRow[]; semeste
     semPractical: Record<number, number>;
   }>();
 
-  for (const slot of slots) {
-    if (slot.isLabContinuation) continue;
-    if (!map.has(slot.facultyId)) {
-      map.set(slot.facultyId, { name: slot.facultyName, semCodes: {}, semTheory: {}, semPractical: {} });
+  const credit = (facultyId: string, facultyName: string, slot: TimetableSlot) => {
+    if (!map.has(facultyId)) {
+      map.set(facultyId, { name: facultyName, semCodes: {}, semTheory: {}, semPractical: {} });
     }
-    const e = map.get(slot.facultyId)!;
+    const e = map.get(facultyId)!;
     const sem = slot.semester;
 
     if (!e.semCodes[sem]) e.semCodes[sem] = new Set();
@@ -41,6 +41,12 @@ function buildActualRows(slots: TimetableSlot[]): { rows: WorkloadRow[]; semeste
     } else {
       e.semTheory[sem] = (e.semTheory[sem] || 0) + 1;
     }
+  };
+
+  for (const slot of slots) {
+    if (slot.isLabContinuation) continue;
+    credit(slot.facultyId, slot.facultyName, slot);
+    if (slot.coFacultyId) credit(slot.coFacultyId, slot.coFacultyName || slot.coFacultyId, slot);
   }
 
   return finalise(map);
@@ -239,14 +245,27 @@ function exportToDoc(rows: WorkloadRow[], semesters: number[], mode: 'expected' 
 }
 
 export function FacultyWorkloadTable({ state }: { state: AppState }) {
-  const hasGenerated = (state.currentTimetable?.length ?? 0) > 0;
+  const currentYear = new Date().getFullYear();
+  const [academicYear, setAcademicYear] = useState(`${currentYear}-${String(currentYear + 1).slice(2)}`);
+  const hook = useSemesterTimetable(academicYear);
+
+  useEffect(() => {
+    if (academicYear) hook.refresh();
+  }, [academicYear]);
+
+  const lockedSlots = useMemo(
+    () => hook.timetables.filter(t => t.status === 'LOCKED').flatMap(t => t.slots),
+    [hook.timetables],
+  );
+
+  const hasGenerated = lockedSlots.length > 0;
 
   const { rows, semesters, mode } = useMemo(() => {
     if (hasGenerated) {
-      return { ...buildActualRows(state.currentTimetable!), mode: 'actual' as const };
+      return { ...buildActualRows(lockedSlots), mode: 'actual' as const };
     }
     return { ...buildExpectedRows(state), mode: 'expected' as const };
-  }, [state.currentTimetable, state.subjects, state.labGroups, state.electiveGroups, state.sections, hasGenerated]);
+  }, [lockedSlots, state.subjects, state.labGroups, state.electiveGroups, state.sections, hasGenerated]);
 
   const totalTheory = rows.reduce((a, r) => a + r.totalTheory, 0);
   const totalPractical = rows.reduce((a, r) => a + r.totalPractical, 0);
@@ -274,23 +293,35 @@ export function FacultyWorkloadTable({ state }: { state: AppState }) {
             </div>
             <p className="text-xs text-slate-500">
               {mode === 'actual'
-                ? 'Based on generated timetable slots'
-                : 'Based on configured subjects, labs and electives — before generation'}
+                ? 'Based on locked semester timetables'
+                : 'Based on configured subjects, labs and electives — before any semester is locked'}
             </p>
           </div>
         </div>
-        <button
-          onClick={() => exportToDoc(rows, semesters, mode)}
-          disabled={rows.length === 0}
-          className={cn(
-            'inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all shadow-sm',
-            rows.length > 0
-              ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-              : 'bg-slate-100 text-slate-400 cursor-not-allowed',
-          )}
-        >
-          <FileDown size={16} /> Export to DOC
-        </button>
+        <div className="flex items-end gap-3">
+          <div>
+            <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wide">Academic Year</label>
+            <input
+              type="text"
+              value={academicYear}
+              onChange={e => setAcademicYear(e.target.value)}
+              placeholder="2026-27"
+              className="w-28 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors shadow-sm"
+            />
+          </div>
+          <button
+            onClick={() => exportToDoc(rows, semesters, mode)}
+            disabled={rows.length === 0}
+            className={cn(
+              'inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all shadow-sm',
+              rows.length > 0
+                ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                : 'bg-slate-100 text-slate-400 cursor-not-allowed',
+            )}
+          >
+            <FileDown size={16} /> Export to DOC
+          </button>
+        </div>
       </div>
 
       {mode === 'expected' && (
@@ -298,7 +329,7 @@ export function FacultyWorkloadTable({ state }: { state: AppState }) {
           <Info size={14} className="mt-0.5 flex-shrink-0 text-amber-500" />
           <span>
             Showing <strong>expected</strong> workload from your data entry.
-            Generate a timetable to see <strong>actual</strong> scheduled hours.
+            Lock a semester timetable to see <strong>actual</strong> scheduled hours.
           </span>
         </div>
       )}

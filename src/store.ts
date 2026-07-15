@@ -253,6 +253,23 @@ export function addSubject(data: Omit<Subject, 'id'>): Subject {
   return s;
 }
 
+export function updateSubject(id: string, updates: Partial<Omit<Subject, 'id'>>) {
+  const s = state.subjects.find(subj => subj.id === id);
+  if (!s) return;
+  const updated = { ...s, ...updates };
+  state = { ...state, subjects: state.subjects.map(subj => subj.id === id ? updated : subj) };
+  saveToSupabase('subjects', {
+    id: updated.id,
+    name: updated.name,
+    code: updated.code,
+    semester: updated.semester,
+    type: updated.type,
+    hours_per_week: updated.hoursPerWeek,
+    faculty_ids: updated.facultyIds
+  });
+  notifyListeners();
+}
+
 export function removeSubject(id: string) {
   state = { ...state, subjects: state.subjects.filter(s => s.id !== id) };
   removeFromSupabase('subjects', id);
