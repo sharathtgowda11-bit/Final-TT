@@ -103,7 +103,7 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
   // ascending actual workload in the current draft.
   const coFacultyOptions = useMemo(() => {
     if (!editingSlot || editingSlot.subjectType !== 'lab') return [];
-    const pool = state.coFacultyPools.find(p => p.subjectName === editingSlot.subjectName);
+    const pool = state.coFacultyPools.find(p => p.subjectName.trim() === editingSlot.subjectName.trim());
     if (!pool) return [];
     const load = computeActualFacultyLoad(draftHook.slots);
     return pool.facultyIds
@@ -460,7 +460,7 @@ export function DraftTimetablePanel({ state }: { state: AppState }) {
                       ))}
                     </select>
                     {coFacultyOptions.length === 0 && (
-                      <p className="text-[10px] text-slate-400 mt-1">No co-faculty pool configured for "{editingSlot.subjectName}" — see Co-Faculty Pools tab</p>
+                      <p className="text-[10px] text-slate-400 mt-1">No co-faculty pool configured for "{editingSlot.subjectName.trim()}" — see Co-Faculty Pools tab</p>
                     )}
                   </div>
                 )}

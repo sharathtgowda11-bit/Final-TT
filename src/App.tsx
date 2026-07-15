@@ -1237,7 +1237,7 @@ function LabsPanel({ state }: { state: AppState }) {
       const assignedRoom = labRooms[idx % labRooms.length];
       return {
         id: l.id,
-        labName: l.labName,
+        labName: l.labName.trim(),
         facultyId: l.facultyId,
         roomId: assignedRoom ? assignedRoom.id : '',
       };
@@ -1459,7 +1459,7 @@ function CoFacultyPoolsPanel({ state }: { state: AppState }) {
     }
     for (const eg of state.electiveGroups) {
       for (const b of eg.batches) {
-        if (b.hasLab && b.subjectName.trim()) names.add(b.subjectName.trim());
+        if (b.hasLab && b.subjectName.trim()) names.add(`${b.subjectName.trim()} Lab`);
       }
     }
     return [...names].sort((a, b) => a.localeCompare(b));
@@ -1477,7 +1477,7 @@ function CoFacultyPoolsPanel({ state }: { state: AppState }) {
       for (const l of lg.labs) add(l.facultyId, l.labName.trim());
     }
     for (const eg of state.electiveGroups) {
-      for (const b of eg.batches) if (b.hasLab) add(b.facultyId, b.subjectName.trim());
+      for (const b of eg.batches) if (b.hasLab) add(b.facultyId, `${b.subjectName.trim()} Lab`);
     }
     return map;
   }, [state.labGroups, state.electiveGroups]);

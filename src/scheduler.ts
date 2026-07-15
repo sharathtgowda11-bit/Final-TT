@@ -857,7 +857,7 @@ function generateTimetableInternal(
             const slot1: TimetableSlot = {
               id: uuid(),
               day: d, period: p1,
-              subjectName: labEntry.labName,
+              subjectName: labEntry.labName.trim(),
               subjectType: 'lab',
               facultyId: labEntry.facultyId,
               facultyName: faculty?.name || labEntry.facultyId,
@@ -874,7 +874,7 @@ function generateTimetableInternal(
             const slot2: TimetableSlot = {
               id: uuid(),
               day: d, period: p2,
-              subjectName: labEntry.labName,
+              subjectName: labEntry.labName.trim(),
               subjectType: 'lab',
               facultyId: labEntry.facultyId,
               facultyName: faculty?.name || labEntry.facultyId,
@@ -992,7 +992,7 @@ function generateTimetableInternal(
               const slot1: TimetableSlot = {
                 id: uuid(),
                 day: d, period: p1,
-                subjectName: labEntry.labName,
+                subjectName: labEntry.labName.trim(),
                 subjectType: 'lab',
                 facultyId: labEntry.facultyId,
                 facultyName: faculty?.name || labEntry.facultyId,
@@ -1009,7 +1009,7 @@ function generateTimetableInternal(
               const slot2: TimetableSlot = {
                 id: uuid(),
                 day: d, period: p2,
-                subjectName: labEntry.labName,
+                subjectName: labEntry.labName.trim(),
                 subjectType: 'lab',
                 facultyId: labEntry.facultyId,
                 facultyName: faculty?.name || labEntry.facultyId,
